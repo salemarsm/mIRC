@@ -1,0 +1,79 @@
+raw 401:*:{
+  whowas $2
+  set %whow 1
+  echo -a 14 $+ this nick isn't in register of this server.
+  halt
+}
+;raw 406:*:{
+;  whowas $2
+;  set %whow 1
+;  echo -a 1,15 $+ this nick isn't in registers of server
+;  halt
+;}
+raw 482:*:echo -a $2 14This command is 0just14 to operators. | halt
+raw 314:*:{
+  window -akl @was 472 300 200 70
+  clear @was
+  aline @was 1info target: 14( 10 $+ $nick 14)
+  echo -a _________________________________________
+  echo -a 14 $+ $2 $+  1was 14 $+ $3 $+ @ $+ $4 $+ $5-
+  echo -a ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+  halt
+}
+raw 1:*: echo -s $stamp $stars Connected to0 $server | halt
+raw 2:*: halt
+raw 3:*: halt
+raw 4:*: halt
+raw 251:*: { 
+  echo -s $stamp 15,14 Network Stats
+  Echo -s $stamp Servers Up:14 $10 
+  echo -s $stamp Users:14 $4 
+  echo -s $stamp Invisible:14 $7 | halt
+}
+;raw 252:*: Echo -s $stamp Sysops on15:4 $2 | halt
+raw 253:*: echo -s $stamp Unknown connections:14 $2 | halt
+raw 254:*: echo -s $stamp Channels:14 $2 | halt
+raw 254:*: echo -s $stamp Channels:14 $2 | halt
+raw 255:*: {
+  echo -s $stamp 15,14 Host Stats
+  echo -s $stamp Host:14 $server
+  Echo -s $stamp Users:14 $4 | halt
+}
+raw 265:*: echo -s $stamp Max:14 $7 | halt
+raw 266:*: echo -s $stamp Global Max:14 $7 | halt
+raw 305:*: echo -s $stamp 5*** 4You aren't away | halt
+raw 306:*: echo -s $stamp 5*** 4You are away | halt
+raw 315:*: if (%unmask.status == off) && (%sysopscan.status != on) { echo -s $stamp End of who15:4 $replace($2,?,.,*,.) | halt }
+;                                        =============================
+;                                                      #### whois ####
+;                                        ==============================
+raw 301:*:echo -a 0,14 $2 14,15is Away: $+ 1 $3- | halt
+raw 311:*:{
+  echo -a  14_________________________________________ 
+  echo -a nick:5 $2 
+  echo -a  address:14 $3 $+ @ $+ $4 
+  echo -a name:14  $6- | halt
+}
+raw 312:*:echo -a server:14 $3 | halt
+raw 313:*:echo -a 8,1WHOW!0,1 $2 is a IRCop! | halt
+raw 317:*:echo -a Idle:14 $duration($3) | halt
+raw 318:*:echo -a 14¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯ | halt
+raw 319:*:echo -a Channels:14 $3- | halt
+raw 401:*:echo -a 14[System error] 1nick not found. | halt
+raw 471:*:echo -a 14[System error] 1channel is full! | halt
+raw 473:*:echo -a 14[System error] 1Invite only. | halt
+raw 474:*:echo -a 14[System error] 1you are banned!. Try to spoof your ip. | halt
+raw 475:*:echo -a 14[System error] 1Password is required.  | halt
+raw 433:*:echo -a 14[System error] 1nick in use. | halt
+
+
+on ^1:TEXT:*:#: {
+  if ($nick isop #) {
+    echo # <14@1 $+ $nick $+ > $1-
+    halt
+  }
+  if ($nick isvo #) {
+    echo # <14+1 $+ $nick $+ > $1-
+    halt
+  }
+}

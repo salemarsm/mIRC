@@ -1,0 +1,648 @@
+10/02/2002 - mIRC v6.01
+
+Fixes/Additions:
+1.Fixed MDI border display bug when windows are opened while mIRC
+  is minimized.
+2.Added visual styles dialog to display dialog.
+3.mIRC no longer changes all paths/filenames to lower case.
+4.Fixed notify list being lost if you used command line parameters
+  in a shortcut icon to change the default ini filename.
+5.Fixed /cnick -an bug.
+6.Fixed IRCX support for MS servers.
+7.Fixed $target bug in channel events.
+8.Fixed $dns(N) always returning a value, even if N was invalid.
+9.Fixed on NOSOUND event not triggering.
+10.Added Show away in active window option to IRC dialog.
+11.Added /editbox -o switch, applies to the second editbox in a
+   channel window.
+12.Extended $editbox(window,N), where N = 1 applies to second
+   editbox in a channel window.
+13.Channel Central and Folder dialogs are now closed only when you
+   disconnect the connection on which the dialogs were opened.
+14.Fixed /ignore -u bug multi-server support.
+15.Fixed display of small buttons in finger/chat/find dialogs
+   under XP.
+16.Added irc:// link options to Catcher dialog.
+17.Fixed password editbox in Lock dialog not allowing enough
+   characters to be entered under XP.
+18.The channel central dialog will now always popup centered over
+   the channel window where it was called.
+19.Added $cmdbox, returns $true if script was called from the
+   command editbox in a channel.
+20.The /fullname and /username commands now correctly update their
+   settings before a connection is made.
+21.Fixed dcc send/get/chat/fileserver timeout message bug.
+22.Fixed $eval() bug when handling N parameter.
+23.Fixed $hget() bug when .item or .data was specified with an
+   out of range N value.
+24.Fixed query window titlebar not displaying user address even if
+   user was in IAL.
+25.Fixed notify nickname hotlinks not working.
+26.$disk(a:) no longer causes a windows dialog to pop up if there
+   is no disk in the drive.
+27.Fixed titlebar right-click option not working on desktop windows.
+28.Fixed /whois away reply resetting $awaytime value.
+29.Made DDE delay editbox width larger in options dialog.
+30.Fixed /play not being cancelled if unable to play to nick/channel.
+31.Fixed channel central ban list appearing in status window in
+   some situations.
+32.Local info server lookup method now holds on to any host or ip
+   address that it has, even if the DNS lookup for that address
+   failed. This means that if numeric 001 or a /whois or /userhost
+   returns your IP, mIRC will use it even if it can't resolve your
+   host from it.
+33.Fixed Agent support in Sounds dialog.
+34.Identd should again work for any external applications, not just
+   for mIRC connections.
+35.Menu items created by $submenu() can now call local -l aliases.
+36.Fixed $sfile() titlebar text bug.
+37.Switching between maximized windows no longer causes flicker.
+38.Chat/query windows now only prevent you from closing a window
+   if an incoming message appeared in the window, not your own
+   typed message.
+39.mIRC is now a bit more lenient with CTCP message formats.
+40.$address now returns address of the server that sent the server
+   message.
+41.Fixed while loop break/continue bug.
+42.Added /drawsave -bN switch, specifies number of bits.
+43.Added -m switch to /draw commands, changes the stretch mode
+   quality when a picture is resized.
+44./dcc get now over-rides the "sort by nicks into own folder"
+   option in dcc folder items.
+45.A /mode on join is no longer sent went joining a modeless
+   +channel.
+46.Added /dcc trust [-r] <on | off | nick | address | level>
+   to add/remove items to dcc trust dialog, and $trust(N) to
+   return items in trust list.
+47.Fixed dcc send/get/chat timing out when system time changed.
+48.Channel nicklists are now cleared after the on DISCONNECT
+   event has been triggered on a disconnection.
+49.Flash option for a highlight item now flashes continuously,
+   whereas the sound is played only N times.
+50.Can now use $opnick in on owner/deowner events again.
+51.Fixed /server N gpf bug where N is a non-existent Nth server.
+52.Fixed connection related gpf bug.
+53.Fixed dcc send/get windows not showing "transfer incomplete" in
+   some situations when a transfer fails.
+54.Improved /ignore /protect etc. handling of network/non-network
+   specific addresses.
+55.Added /server [-i nick anick email name] [-j #channel pass]
+   switches, must be used after the server parameters.
+56.Added "User id from email address" to identd dialog.
+57.Fixed on close ? event triggering when status window is closed.
+58.Fixed $sound() bug.
+59.Fixed /whowas and /whois away message handling bug.
+
+03/02/2002 - mIRC v6.0
+
+Fixes/Additions:
+1.Fixed /filter numeric sorting bug.
+2.Fixed $hget().data bug.
+3.Fixed Nick color listbox display bug.
+4.Fixed $mask() not handling masked address.
+5.Channel nick list is now cleared when you disconnect from a server
+  and you have "keep channels open" enabled.
+6.Added /flush -l switch, removes only the specified levels from
+  entries in the user list, instead of removing the entries.
+7.Added $mnick back, returns your primary nickname.
+8.The max cps fserve option now allows a dcc send to use up the full
+  max cps if no other dccs are using the bandwidth.
+9.Speeded up the way the servers list is handled in many routines,
+  including identifiers such as $server().
+10.Fixed mIRC not processing ports correctly in server definition
+   if password contains a - character.
+11.Improved the way /dcc get works, now also allows you to redirect
+   a file to any folder.
+12.Fixed switchbar display bug with overlapping buttons.
+13.Fixed topic text being highglighted in channel central when dialog
+   is displayed.
+14.mIRC now recognizes MS IRC Server 6.0 as IRCX.
+15.Fixed /whois, etc. bug in query windows which was causing a command
+   to use the wrong nickname.
+16.Fixed /drawrect -d bug.
+17.Fixed /filter not working with local aliases.
+18.Fixed $! not being passed in $iif() call.
+19.Added /notify -l switch to list notify entries.
+20.Added dialog -l table definition switch, makes a dialog table local,
+   now also looks for dialog table in the active remote file before
+   searching through all others.
+21.Added command line switch -nouninst which prevents mIRC from adding
+   an uninstall item to the control panel add/remove dialog.
+22.Fixed switchbar, in left/right position, not displaying partial button
+   at bottom.
+23.Fixed selecting MDI window menu item in tray menu not redisplaying
+   mIRC window properly.
+24.Open Folder button in DCC Get dialog is now enabled even if transfer
+   fails.
+25.Fixed #$N- bug.
+26.Added /ial [on | off] back for users who need to disable the IAL.
+27.Fixed "monitor file changes" option not working with LFNs.
+28.File/Folder dialogs and sub-dialogs no longer show "mIRC" in titlebar.
+29.Uninstaller now deletes files in the root mIRC folder only and not
+   in sub-folders.
+30.Added "Reset default size" option to nicklist dialog.
+31.Wheel mouse now scrolls listbox without it needing focus.
+32.Added set/use default options to system menu background popup.
+33.Fixed window tiling overlap bug.
+34.Added 'flat' and "multi' styles to custom dialog button control.
+35.Can now create a second editbox on channel windows, via the channel
+   window system menu and right-click menu in editbox.  You can use
+   Alt+Q to show/hide the editbox.
+
+   Also added "Tab key changes editbox focus" to General dialog,
+   makes it easier to switch to the second editbox. The tab key still
+   works as nick/channel/etc. completion if cursor is next to a word.
+
+   If enabled, you need to use Shift-Tab to cycle between the list of
+   nicks that messaged you.
+
+36.Blink feature now only blinks icons for query/chat windows, and
+   on channels or the message window only if a highlight event was
+   triggered.
+37.Fixed /exit not closing mIRC if Editor dialog is open.
+39.Updated color dialog, also added inactive editbox option.
+40.A dcc resume now chops off the last 8192 bytes of a file in case
+   the end of the file was corrupted during a previous transfer.
+41.Added /tnick command, changes to a temporary nickname without
+   affecting your main and alternate nickname settings.
+42.$window(-3).dw/dh now return the display area of the MDI window.
+43.Fixed Alt+N key bug which would cause it stop working in some
+   situations.
+44.Fixed /hadd gpf when insufficient parameters were used.
+45.Can now use \ to escape a literal character in $regsub() in the
+   substitution expression.
+46.Added /links -nx switches, opens links window minimized or
+   maximized.
+47.Added 'nowrap' property to custom dialog text controls.
+48.Can now specify "range N N" for custom dialog scroll control.
+49.Fixed /dialog bug preventing you from creating more than one
+   modal custom dialog.
+50.Fixed a bug in my socket random port selection routine.
+51.Fixed /load -rs \path\to\script.mrc not loading the script.
+52.Fixed /echo -h bug.
+53.Fixed /server gpf bug with long server names.
+54.If the auto-close dcc send/get options are enabled and you
+   manually click the cancel button in dcc send/get windows, they
+   are no longer auto-closed.
+55.Fixed $snicks error message, and it no longer halts a script
+   if used on a non-channel window.
+56./renwin now allows you to change the window name even if it's the
+   same name but different case.
+57.Away messages for a nick are now displayed in their associated
+   query window if it is the currently active window.
+58.mIRC will no longer rejoin an open channel window if you disconnect
+   and then connect to a different network.
+59.Added /pvoice command, works the same as /pop but for +v modes.
+60.Fixed nick color list bug, was coloring nicknames incorrectly if
+   your ignore/op/voice/etc. lists where not enabled.
+61.Hotlink now works for all channel names in channel windows.
+62.Fixed bug with /play -e option processing | separator in text.
+63.Added internal support for +d channel mode for hybrid6 servers.
+64.Fixed $cnick().method bug.
+65.Added $awaymsg and $awaytime to return away status when used
+   with $away identifier.
+66.Added /window -B switch to prevent custom @window editbox from
+   using a border.
+67.Fixed $nick().color not working correctly when used with the
+   'aohvr' mode parameters.
+68.$readn is now correctly reset on a failed $read.
+69.Fixed $remove() not working if a $null substring was specified.
+70.mIRC no longer includes the >N parameter in a /LIST if N is zero.
+   This allows it to list registered channels with no users.
+71./channel request now has a time-out again.
+72.Fixed /flash -rN, now repeats flash only N times.
+73.The nick color list now allows you to prioritize the list, so
+   mIRC no longer determines the best match by itself, it will use
+   the first match it finds in the list.
+74.Added support for server redirection numeric 10.
+75.Fixed Position Reset menu item not working correctly if window
+   desktop/mdi position changed.
+76.Fixed bug with +channel windows.
+77.Added /remove -b switch, deletes file and places it in the
+   recycle bin.
+78.Improved $rand() behaviour.
+79.Added /if islower/isupper comparison.
+80.Added WMA/OGG support to sounds dialog, /splay and /sound
+   commands, and added new identifiers.
+
+   $sound(filename|type)
+   Returns information about the specified file if a filename
+   was specified, or the associated folder for a filename or
+   file type, where type can be wave, midi, mp3, wma, ogg.
+
+   When used with an mp3 files it supports the same properties
+   as $mp3().
+
+   Note: this replaces $wavedir, $mididir, $mp3dir, and $mp3().
+   These are still supported for now but no longer documented.
+
+   $insong
+   Returns information about the mp3, wma, or ogg file that
+   is being played, same properties as $inmp3.
+
+   Note: this replaces $inmp3, which is still supported for
+   now but no longer documented.
+
+81./alias now replaces an existing alias without changing it's
+   position in the script.
+82.Added Trusted Users list to DCC Auto-get options dialog.
+83.Changed behaviour of #channel name tab completion to include
+   currently open channels.
+84.Custom dialog size now takes account of menubar height.
+85.Added $timestampfmt to return options dialog timestamp format.
+86.Fixed Shift+Control+V pasting text twice.
+87.Fixed /renwin not allowing custom menus to work with new window
+   name.
+88.All internal joins and names now use the /join and /names commands
+   to allow scripts to over-ride the default behaviour.
+89.Added $send()/$get() .resume property returns resume position.
+90.Added "fast screen update" back to options/display dialog.
+91.Fixed /links gpf bug with long server addresses.
+92.Added minimize button to dcc chat accept dialog which also has
+   default focus.
+93.Log files now include a "Session ident" at the start of the log,
+   with the name of the window being logged.
+94.Fixed /channel behaviour when used on an open channel window from
+   which you were kicked.
+95.Fixed window positioning bug when Windows Taskbar wsa on the left
+   side of the desktop.
+96.Incoming dcc get files are now flushed to disk every 500k.
+97.Fixed remote script popup menus not being merged properly.
+98.Added case-sensitive option to Highlight dialog items.
+99.Added Message Window double-click item to Mouse dialog.
+100.Added $color().dd property, returns double digit format.
+101.Fixed fserve cd/get bug.
+102.Fixed $base() not handling fractions properly.
+103.Fixed "Save As" bug in Script editor dialog when over-writing an
+    existing file.
+104.Firewall can now be enabled separately for server and dcc
+    connections.
+105.Added signalling commands and events which allow you to trigger
+    signal events in scripts:
+
+    /signal -n <name> [parameters]
+
+    By default the signal is triggered after all current scripts
+    have finished executing. You can use -n to make the script
+    trigger immediately.
+
+    on *:signal:name:echo Received signal: $signal Parameters: $1-
+
+    The name can contain wildcards.
+
+    The script that called /signal is triggered first, and then
+    all other scripts are triggered.
+
+106.Fixed dcc send/get/chat beeping on completion when you had your
+    Sounds disabled in the Options/Sounds dialog.
+107.mIRC now strips out tab characters from filenames.
+108.$input() now allows $null for all parameters except prompt.
+109.Fixed dcc chat "ignore all" option bug.
+110.Fixed bug where on DNS event triggered for DNS requests not made
+    by the /dns command.
+111.Added $dns(N) identifier, used in the on DNS event to list the
+    address that was resolved and any associated IP addresses.
+
+    Properties: nick, addr, ip. $dns(N) without a property returns the
+    address being resolved. You can use N = 0 to return number of IP
+    addresses found.
+
+    Note: the old identifiers $iaddress, $naddress, and $raddress are
+    still supported but are no longer listed in the help file.
+
+112.Added $ignore().secs property, returns number of seconds until
+    ignore is removed if /ignore -uN was used.
+113.Can now use $null as third parameter in $dll() identifier.
+114.Added /echo -g switch, prevents line from being logged to logfile,
+    and /echo -r switch which applies the strip settings in the Options,
+    Messages dialog.
+115.Fixed script menus not working when first line of menu definition
+    was empty.
+116.Fixed mIRC not handling multiple numeric 005's correctly.
+117.Custom dialog "limit N" option now works in combo editbox.
+118.Added /hadd -z switch, decreases hash item once per second until
+    it reaches zero and then unsets it. Also added commands:
+
+    /hinc -smbczuN <name> <item> [data | &binvar]
+    /hdec -smbczuN <name> <item> [data | &binvar]
+
+    Switches are the same as /hadd, except for -c which increases or
+    decreases the value once per second.
+
+    Also added $hget().unset property, returns time remaining before
+    item is unset.
+
+118.Fixed dcc send/get windows sometimes not showing 100% completion
+    after a transfer has completed.
+119.Changed highlight dialog item "Flash N times" to apply to both
+    the number of times mIRC flashes and plays the flash sound.
+120.DCC chats now display the time the connection was initiated in
+    the DCC Chat Session line.
+121.Changed the way /set -u0 works slightly.
+122.Fixed $eval() not handling values containing commas properly.
+123.When running under XP, mIRC now uses the XP theme for dialogs,
+    buttons, etc.
+124.Can now change nicknames in options dialog while connected.
+125.Added $stripped identifier, returns number of BURK codes that
+    were stripped from an incoming message, if any.
+126.Extended /socklist [-tul] [name], allows you to list open tcp,
+    udp, or listening sockets, as well as sockets matching the
+    specified wildcard name.
+127.While loops now works properly even if {} enclosing brackets
+    aren't used.
+128.Fixed /queryrn, was allowing you to change the name of any
+    window not just query windows.
+129.The retry options in the connect/options dialog now have their
+    own dialog.
+130.The /clearall command no longer clears custom @windows, only
+    status, channel, and query windows.
+131.Fixed display of $+ string too long error message.
+132.The /alias command can now handle LFNs in quotes.
+133.Added $cmdline identifier, returns command line passed to mIRC
+    when it is first run.
+134.Auto-join on invite now uses channel's password from channels
+    folder if it is listed in the folder.
+135.The "Logging to" message now shows the full logfile name.
+136.Fixed $chan().ial issue, I've added a separate $chan().inwho
+    property. $chan.ial will still return $inwho for now but will
+    not do so in future versions of mIRC.
+137./filter now allows you to use -l to read from a channel nickname
+    listbox.
+138.Fixed $timer().reps returning negative value in some situations.
+139.Fixed $read and $readini bug.
+140./cnick * N now sets the Any mode/No mode switches if no mode
+    is specified, and *!*@* now matches any nickname.
+141.Fixed bug with full exception list not being displayed in
+    channel central dialog.
+142.Popup menus now allow menu headers without a sub-menu.
+143.The control dialog lists, ie. ignore, voice, protect, op, are
+    now stored in a control.ini file, separate from mirc.ini.
+144.Fixed servers.ini processing bug, mIRC was unable to read server
+    entries which didn't specify a port number.
+145.Fixed $dll() not correctly handling partial paths in filenames.
+146.Fixed $result not being reset to an empty value when /return $null
+    is used.
+147.Added logging dialog "make folder" option to network option.
+148.Added retry delay option to Retry connect dialog.
+149.It is no longer possible to enter editbox commands that begin
+    with an $identifier or %variable.
+150.Added $submenu($id($1)) identifier, can only be used in popup
+    menu definitions. It calls $id($1) with $1 = 1, increasing $1
+    with each call, and adding whatever is return by $id() to the
+    popup menu. The returned value must be a one line definition
+    format for a popup menu. The iteration ends when $id() returns
+    no value.
+
+    test {
+      if ($1 == begin) return -
+      if ($1 == 1) return Moo:echo Moo
+      if ($1 == 2) return Cow:echo Cow
+      if ($1 == end) return -
+    }
+
+    The "begin" and "end" values are sent to check if the item
+    should be enclosed in separators.
+
+151.Added "Group by Network" option to Window menu.
+152.Added "Save Links" option to Links window popup window.
+153./server address now looks for a match for address in servers
+    list and uses that info for the network, group, etc.
+154.$islower()/$isupper() now ignore numbers.
+155.Comments in popup menus are now handled correctly.
+156.Fixed /showmirc -t and window restore via tray bug.
+157.$read() should now correctly handle matchtext with quotes,
+    also fixed a bug in $read() handling of -s switch.
+158.Extended socket commands to allow binding to an ip address:
+
+    /socklisten -d [ipaddress] etc.
+    /sockopen -d [ipaddress] etc.
+    /sockudp -d [ipaddress] etc.
+
+    Also added $sock().bindip and .bindport properties, and
+    /socklist now shows the bind address and ip.
+
+159.Can now use /halt in the on KEYDOWN event to prevent mIRC
+    from applying it's own TAB key completion.
+160.Added "Queue own messages" option to flood dialog, applies
+    only to your PRIVMSG and NOTICE messages.
+
+    Also added "Show status updates", displays flood queue
+    status 1) when there is a new item in the queue, 2) every
+    10 seconds, if the queue status changed, and 3) when the
+    queue becomes empty.
+
+161.Added [type] parameter to /protect command.
+162.Added kludge to handle multiple meanings for numeric 477 on
+    DALnet servers.
+163.mIRC now processes only the first 700 bytes of an incoming
+    server message, and ignores the remainder up to the next LF
+    character.
+164.Editor dialog now also displays horizontal cursor position.
+165.Fixed find text dialog not saving trailing spaces in search
+    words.
+166.Fixed /drawtext width measurement bug.
+167.Fixed bitmap file loading bug.
+168.Imroved $wrap(), no longer needs to re-calculate if you use
+    the same parameters as the previous call.
+169.Added support for DALnet services numerics 650 and 651.
+170.Improved file/dir existence checking routines.
+171.mIRC now prevents a chat/query window from being closed if it
+    receives a message just as you click the close button. You need
+    to click the close button twice within a few seconds of the last
+    message to close the window.
+172.Fixed $sfile() $sdir() not handling incomplete paths properly.
+173.Fixed /splay -c bug.
+174.Fixed /window not handling LFNs for icon filename.
+175.Changed $sfile() behaviour, it will now only list files of
+    the type you've specified, if it finds a match for that file
+    type in the "file types" listbox in the file dialog.
+176.Added Multi-Server support. mIRC now allows you to connect to
+    multiple servers at the same time.
+
+    This feature required major internal changes to mIRC code and
+    forced improvement of code in many areas which has hopefully
+    resulted in a more stable/robust mIRC.
+
+    Added "New server window" checkbox to connect dialog. To open
+    a new server window without connecting to a server, you can
+    check the "New Server Window" checkbox and press the OK button.
+
+    Added "New Server Window" menu item to options toolbar button
+    servers popup menu. You can also open a new server window by
+    holding down the Shift key when you select a server from the
+    popup menu.
+
+    Added multi-server dialog to connect/options dialog.
+
+    New commands and identifiers:
+
+      $cid - returns server connection id for current script
+      $wid - returns window id for current script
+
+      $status - returns server connection status. Also returns
+                "closing" during the on disconnect event if the
+                status window being closed is the cause of the
+                disconnection.
+
+      $activecid, and $lactivecid.
+
+      $scid(N)[.command], where N is a $cid value
+      $scon(N)[.command], where N is the Nth connection
+
+      If N = 0, returns total number of open status windows.
+
+      You can also specify a property which is a command name
+      and it will be called using that server connection.
+
+      /scid <-rsatM | N> [command], where N is a $cid value
+      /scon <-rsatM | N> [command], where N is the Nth connection
+
+      If you specify a command, the connection id is set only for
+      that command. The -r switch resets the connection id to the
+      original id for that script.
+
+      The -a and -tM switches can only be used if you specify a
+      command.
+
+         -a - perform the command on all connection ids.
+
+        -tM - where M is an or'd value of 1 = server connected,
+              2 = not connected, 4 = connecting, 8 = not connecting.
+              The command is only performed if N matches the connect
+              status of the connection id.
+
+      Note: if you use a command that contains $identifiers, and
+      you want the identifiers to be evaluated in the target
+      connection, you must pass them as $!identifier to prevent
+      them from being evaulated first in the current connection.
+
+    Also added new properties to $window():
+
+      .type - returns window type name
+
+    And to $query(), $window(), $chat(), $send(), $get(), $chan(),
+    and $timer():
+
+      .cid  - server connection id
+      .wid  - window id
+      .hwnd - window handle
+
+    Added /server -mn switches, where -m creates a new server window
+    and connects, -n creates new server window without connecting.
+
+    Misc. notes:
+
+    Windows whose server connection has been closed are placed
+    at the end of the switchbar list. This includes things like
+    dcc send/get/chat, and custom windows.
+
+    Everything in mIRC now has a unique id number, all windows,
+    server connections, dcc sends/get/chats, etc.
+
+    The tray icon displays the animation for the current active
+    server connection, same goes for the Connect toolbar button,
+    and File menu.
+
+    Each server connection has it's own /play list, and the play
+    dialog shows the play list for the current active connection.
+
+    URLs list "Send To" menu, and Tray popup menu, show the network
+    and nickname for each status window.
+
+177.Added /timer -i switch, makes a timer auto-associate with the
+    currently active server connection.
+
+    The -i switch keeps the /timer alive across server windows,
+    if a server window is closed, the /timer just picks a new one
+    automatically.
+
+    /timer now shows the associated network name for a timer.
+
+    You can use $timer().anysc to check if it has the -i switch
+    enabled.
+
+178.on PLAYEND is now triggered at the end of each played file.
+179.Extended /ignore, /protect, etc. handling.
+
+    Changed display format in Control dialog listbox.
+
+    /ignore, /protect, /aop, and /avoice now all by default
+    include a network name, unless you use the -w switch.
+
+    /ignore -l now displays the unignore time.
+
+    /ignore -l, when you're not connected to a server, lists all
+    ignores. When connected, it lists all ignores that apply to
+    that connection.
+
+    Added .network property to $ignore()/$protect/$aop()/$avoice().
+
+    Also note that isaop, isavoice, isignore, and isprotect all
+    apply to the current connection.
+
+180.Added /window switches:
+
+    When a @window is created, it is automatically associated
+    with the current connection. If that connection is closed,
+    the @window is associated with the next available connection.
+
+    You can change this behaviour with /window -ivz:
+
+    -i - makes a @window dynamically associate with the currently
+         active connection. You can use $window().anysc to check
+         if this setting is active.
+
+    -v - closes window when associated status window is closed
+         The on close event is triggered for the window.
+
+         If this switch isn't used and the status window is
+         closed, the @window is moved to the end of the switchbar,
+         and is associated with the first available status window.
+
+    -z - places window button at end of switchbar
+
+181.The . prefix now makes /debug quiet. Extended /debug to allow
+    output to a custom @window or filename.
+
+    /debug [-cnpt] [N] [on | off | @window | filename]
+
+    /debug -c off    closes associated @window
+    /debug -n @moo   opens @window minimized
+    /debug -pt       wrap or timestamp text
+    /debug N @moo    use color N for text
+
+    $debug returns name of debug file or @window.
+
+    /debug now works independently for each server connection,
+    indents lines if not wrapped, and prefixes each line with
+    the server address, and <- and ->.
+
+    /debug @window now also works with listbox @windows.
+
+182.Active switchbar button now uses bold text and shaded background.
+183.Using new path-splitting routines which affect eg. $nopath().
+184.Auto-tile/cascade/arrange are no longer triggered when you close
+    a desktop window.
+185.Fixed switchbar/toolbar display glitch when mIRC window is sized
+    to a very small height.
+186.Fixed $findfile() bug when handling wildcards with numbers.
+187.$chan is now filled for the on ctcpreply event if it was a channel
+    ctcp message.
+188.Ctcp messages that use an invalid format are now treated as plain
+    text, and will trigger script events.
+189.Added "Control+Tab uses switchbar order" to General dialog.
+
+-
+
+The full versions.txt has become too large to include in the
+distribution, so only the version information for the current
+version is being included from now on. You can however still
+download the full versions.txt file from the mIRC website at
+http://www.mirc.co.uk
+
+-
+
+28/02/95 - mIRC v2.1a
+
+First public release.
+

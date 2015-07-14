@@ -1,0 +1,6 @@
+LAN (estatística)
+PE165176055.user.veloxzone.com.br - 200.165.176.55 (AnalogX)
+PE141168031.user.veloxzone.com.br - 200.141.168.31
+Socks4
+24.9.163.224:2280
+68.48.50.181:19358

@@ -1,0 +1,327 @@
+;                                    =======================================
+;                                                       ### Lag check ###
+;                                   ========================================
+alias sping {
+  set %sping.time $ctime
+  raw -q TIME $server
+}
+raw 391:*:{
+  set %sping $calc($ctime - %sping.time)
+  titlebar connected on $server $+ : $+ $port Real ip: $+ $ip   time: $time   Self lag: $duration(%sping) 
+  unset %sping*
+  halt
+}
+on 1:connect: {
+  timer1 0 10 /sping 
+}
+on 1:disconnect: {
+  /titlebar the spirits are waiting orders..
+  timer1 off
+}
+
+;            ===================================================
+;                                                Auto identify
+;            ===================================================
+#identify on
+on *:notice:*dono*:?: {
+  if ($nick == NickServ) { .msg nickserv identify %password.nick }
+  elseif (%password.nick == $null) { echo -a No configured password! }
+  else { halt }
+}
+on *:notice:*1 minuto*:?: {
+  if ($nick == NickServ) { .echo -a Identify complete..   }
+  else { halt }
+}
+#identify end
+dialog autoid { 
+  title "Auto Identify" 
+  size 300 200 100 115
+  box "Set Password:" 9, 5 5 95 40
+  edit "", 1, 10 20 85 20, pass
+  button "On", 2, 20 60 30 20, ok
+  button "Off", 3, 55 60 30 20 
+  button "Cancel", 6, 30 90 45 20, Cancel
+}
+alias autoid { dialog -m autoid autoid }
+on *:dialog:autoid:edit:1:{ .set %password.nick $did(1) } 
+on *:dialog:autoid:sclick:2: {  
+  .enable #identify | /echo -a Auto identify On
+}
+on *:dialog:autoid:sclick:3: {  
+  .disable #identify | /echo -a Auto identify Off | dialog -c autoid autoid
+}
+;           ===================================================
+;                                                     ident protection
+;           ===================================================
+
+#ident off
+on 1:socklisten:ident:{
+  sockrename ident ident1
+  sockaccept ident
+  if ( %ident.prot == On ) { 
+    if ( %ident.atack == 1 ) {
+      if ( $sock(ident).ip == %ident.atack.host ) {
+        sockclose ident1
+        sockclose ident
+        echo 6 ***Warning: Multiple ident requests from $sock(ident).ip, might be an atack on port 113, shuting down ident for 5 secs
+        .timer -o 1 5 /socklisten ident 113
+        .timer -o 1 5 /set %ident.atack 0 
+        halt
+      }
+    }
+    set %ident.atack 1
+    set %ident.atack.host $sock(ident).ip
+  }
+  echo 6 *** Ident request from $sock(ident).ip
+}
+
+alias v_ident {
+  if (( $1 isnum ) && ( , isin $2 ) &&  ( $3 isnum )) { 
+    if ( %ident.reply == 0 ) { sockwrite -n ident $3 , $1 : USERID : %ident.sys : %ident.name | echo 6 *** Ident reply:  $3 $+ , $1 : USERID : %ident.sys : %ident.name }
+    elseif ( %ident.reply == 1 ) { sockwrite -n ident $3 , $1 : USERID : ERROR : NO-USER | echo 6 *** Ident reply:  $3 $+ , $1 : USERID : ERROR : NO-USER }
+    elseif ( %ident.reply == 2 ) { sockwrite -n ident $3 , $1 : USERID : ERROR : HIDDEN-USER | echo 6 *** Ident reply:  $3 $+ , $1 : USERID : ERROR : HIDDEN-USER }
+  }
+  else echo 6 *** Ident Error: Inavalid ident parameters
+}
+
+on 1:sockread:ident:{
+  :reread
+  sockread %temp
+  if ( %temp != $null ) { echo 6 *** Recived from $sock(ident).ip the folowing ident parameters %temp | v_ident %temp }
+  if ( $sockbr != 0 ) { goto reread }
+  :wait
+  if ( $sock(ident1).sq > 0 ) { goto wait }
+  if ( $sock(ident).sq > 0 ) { goto wait }
+  sockclose ident1
+  sockclose ident
+  socklisten ident 113
+  .timer -o 1 5 /set %ident.atack 0 
+}
+#ident end
+alias s_ident {
+  dialog -m ident ident
+}
+
+on 1:dialog:ident:init:0:{
+  if ( %ident.on == On ) { did -c ident 3 } 
+  else {
+    did -b ident 4
+    did -m ident 6
+    did -m ident 8
+    did -m ident 10
+    did -b ident 12
+    did -b ident 13
+    did -b ident 14
+  }
+  if ( %ident.prot == On ) { did -c ident 4 }
+  did -a ident 6 %ident.name
+  did -a ident 8 %ident.sys
+  did -a ident 10 %ident.port
+  if ( %ident.reply == 0 ) { did -c ident 12 }
+  elseif ( %ident.reply == 1 ) { did -c ident 13 }
+  else { did -c ident 14 }
+}
+
+on 1:dialog:ident:sclick:3:{
+  if ( %ident.on == On ) {
+    set %ident.on Off
+    .disable #ident
+    did -b ident 4
+    did -m ident 6
+    did -m ident 8
+    did -m ident 10
+    did -b ident 12
+    did -b ident 13
+    did -b ident 14
+  } 
+  elseif ( %ident.on == Off ) {
+    set %ident.on On
+    .enable #ident
+    did -e ident 4
+    did -n ident 6
+    did -n ident 8
+    did -n ident 10
+    did -e ident 12
+    did -e ident 13
+    did -e ident 14
+  }
+}
+
+on 1:dialog:ident:sclick:4:{
+  if ( %ident.prot == On ) { set %ident.prot Off }
+  elseif ( %ident.prot == Off ) { set %ident.prot On }
+}
+on 1:dialog:ident:sclick:12:{
+  set %ident.reply 0
+}
+on 1:dialog:ident:sclick:13:{
+  set %ident.reply 1
+}
+on 1:dialog:ident:sclick:14:{
+  set %ident.reply 2
+}
+on 1:dialog:ident:edit:6:{
+  set %ident.name $did(6)
+}
+on 1:dialog:ident:edit:8:{
+  set %ident.sys $did(8)
+}
+on 1:dialog:ident:edit:10:{
+  set %ident.port $did(10) 
+}
+
+dialog ident {
+  title "Ident Setup"
+  size -1 -1 230 240
+  box "Ident", 1, 5 5 220 227
+  button "Accept", 2, 170 65 50 43, ok
+  check "Enable script Ident", 3, 15 25 150 13, right
+  check "Ident port atack protection", 4, 15 45 145 13, right
+  text "UserID:", 5, 15 68 35 20, left
+  edit "", 6, 55 65 110 20, left
+  text "System:", 7, 15 90 39 20, left
+  edit "", 8, 55 87 110 20, left
+  text "Port:", 9, 30 112 30 20, left
+  edit "", 10, 55 109 50 20, left
+  box "Reply", 11, 15 130 200 90 
+  radio "Normal Reply", 12, 25 150 90 13, right
+  radio "Reply an Error (not recomeded)", 13, 25 170 170 13, right
+  radio "Hidden User (extra protection)", 14, 25 190 170 13, right
+}
+;                       ===================
+;                          ### Ip finder ###
+;                       ===================
+DIALOG ip {
+  title "Ip translator"
+  size -1 -1 265 111
+  text "Ip to nick",1,0 5 260 15,center
+  edit "",2,35 30 135 20,autohs
+  text "IP:",3,10 30 25 20
+  button "&OK",4,200 30 60 20,ok,default
+  button "&Cancel",5,200 55 60 20,cancel
+  edit "",6,35 55 135 20,autohs
+  text "Chan:",7,0 55 30 20
+  text "Method:", 8, 5 86 100 20
+  radio "&Fast", 9, 55 83 100 20,push
+  radio "&Slow", 10, 160 83 100 20,push
+}
+ON *:DIALOG:ip:init:*:{
+  did -c ip 9 | if ($chan(0) = 0) { goto end } | set %temp.inc 1 | :loop
+  if (%temp.inc > $chan(0)) { goto end } | if ($chan(%temp.inc) = $active) { did -a ip 6 $chan(%temp.inc) | goto end }
+  else { inc %temp.inc | goto loop } | :end | unset %temp.inc | if ($did(ip,6).text = $null) { did -a ip 6 $chan(1) }
+  if (%use.chan != $Null) { did -o ip 6 1 %use.chan | unset %use.chan } | if (%use.ip != $Null) { did -a ip 2 %use.ip | unset %use.ip } 
+  if ((%use.ip != $Null) && (%use.chan != $Null)) {  replacetext ip 1 1 plexi Script's FinIP | .timerquickstart 1 0 /dialog -k ip }
+}
+ON *:DIALOG:ip:sclick:4:{ 
+  if ($did(ip,2).text = $null) { did -o ip 1 1 Need an IP number!! | .timerrt 1 4 .replacetext ip 1 1 plexi Script's FinIP | halt }
+  if ($did(ip,6).text = $null) { did -o ip 1 1 Need a channel to search (you must be in it)!! | .timerrt 1 4 .replacetext ip 1 1 plexi Script's FinIP | halt }
+  if ($me !ison $did(ip,6).text) { did -o ip 1 1 You are not on that channel! | .timerrt 1 4 .replacetext ip 1 1 plexi Script's FinIP | halt } | set %ip.max $nick($did(ip,6).text,0) | set %ip.ip $did(ip,2).text | set %ip.i 1 | set %ip.chan $did(ip,6).text | if ($did(ip,9).state = 1) { .timer 1 0 fast.start } | else { .timer 1 0 lets.start }
+}
+
+ALIAS FinIP { 
+  if ($server = $Null) { psecho -sl You have to be connected to a server and in a channel before using this function. | return } | if ($1 != $Null) { set %use.ip $1 } | else { unset %use.ip }
+  if ($2 = $Null) { if $left($active,1) = #) { set %use.chan $active } } | else { set %use.chan $2 } | if ($dialog(ip)) { dialog -v ip } | else { dialog -ma ip ip } | .disable #dnsipforaddy | .disable #whogetaddynick | .disable #dnsnick
+}
+ALIAS finipinfo {
+  linesep -s | psecho -sg Welcome to FinIP! | psecho -sg * FinIP takes an IP number and searches a channel to find a nickname that matches that IP. | psecho -sg This could be useful if you have a IP from an external program of someone in the channel who is nuking you or maybe you know someone with a static IP that may be using a different nickname.
+  psecho -sg ...And who knows else what for. | psecho -sg Although not too many people may find this useful, I, as well as others, have. So i've decided to release this stand alone version to the public for use. | psecho -sg I would really apperciate if you would e-mail me at epip@cryogen.com with comments/suggestions/ideas about FinIP. Thank you greatly... | linesep -s | psecho -sg How To Use:
+  psecho -sg A) If you know the channel and IP you would like to search for... type /finip [channel] [ip] ... please keep in mind you must be IN the channel to search it. | psecho -sg B) If you would like to use the dialog with the IP, Channel, and Method (Fast or Slow) options before you begin searching, type /finip, or use the Pop-up Menus in the Menubar, Channel, or Nicklist. 
+  psecho -sg Otherwise have fun, -Nirve
+}
+ALIAS -l psecho {
+  if (- isin $1) { if ($1 = -s) { /echo $colour(info) -ts *** $2- | goto end } | if ($1 = -sn) { /echo $colour(info) -ts *** $2- | goto end } | if ($1 = -c) { /echo $colour(info) -t $2 *** $3- | goto end } | if ($1 = -sg) { /echo $colour(info) -s *** $2- | goto end } | if ($1 = -l) { /echo $colour(info) -et *** $2- | goto end } | if ($1 = -lc) { /echo $colour(info) -et $2 *** $3- | goto end } | if ($1 = -sl) { /echo $colour(info) -est *** $2- | goto end } }
+  if ($left($1,1) = $chr(35)) { /echo $1  $+ $colour(info) $+ $timestamp *** $2- | goto end } | if ($left($1,7) = $active) { /echo -a  $+ $colour(info) $+ $timestamp *** $2- | goto end } | else { /echo -a  $+ $colour(info) $+ $timestamp *** $1- | goto end } | :end
+}
+ALIAS replacetext { if ($dialog($1)) { did -o $1 $2 $3- } }
+ALIAS -l dns { .dns $1- | halt }
+ALIAS -l fast.start { open.ipstat | set %ip.RUNNING yes | .enable #dnsipforaddy | .dns %ip.ip }
+ALIAS -l whothechanforaddy { set -u30 %justjoined yes | .who %ip.chan | .enable #whogetaddynick }
+ALIAS -l lets.start { open.ipstat | set %ip.RUNNING yes | set %ip.i 1 | start.scan }
+ALIAS -l start.scan { 
+  if (%ip.RUNNING = $Null) { return }
+  if (%ip.i > %ip.max) { dec %ip.i | finish.scan no }
+  if ($dialog(ipstat)) { did -r ipstat 4 | did -a ipstat 4 %ip.i  $+ $chr(160) }
+  .enable #dnsnick | .dns -ps $nick(%ip.chan,%ip.i)
+}
+ALIAS -l dns { if ($1 = -ps) { .dns $2 | return } | else { dns $1 } }
+
+;:::::::::::::::::::::::::::::::::::::::
+;::::::::::::::::::::::::::::::::::::::: FAST Method.
+;:::::::::::::::::::::::::::::::::::::::
+
+#dnsipforaddy off
+ON *:DNs:{
+  if ($iaddress = %ip.ip) { 
+    if ($raddress != $null) { set %ip.raddy $raddress | /whothechanforaddy }
+    if ($raddress = $Null) { if ($dialog(ipstat)) { did -o ipstat 6 1 Error, begining slow method. } | .disable #dnsipforaddy | unset %ip.raddy | .timer 1 0 lets.start }
+  } 
+}
+#dnsipforaddy end
+
+#whogetaddynick off
+RAW 352:*: {
+  if ($dialog(ipstat)) { did -r ipstat 4 | did -a ipstat 4 %ip.i  $+ $chr(160) }
+  set -u1 %temp.raw $1- | if ($gettok(%temp.raw,2,32) != %ip.chan) { goto end }
+  if ($gettok(%temp.raw,4,32) = %ip.raddy) { finish.scan yes $gettok(%temp.raw,6,32) | .disable #whogetaddynick } | :end | inc %ip.i | halt
+}
+RAW 315:*: { finish.scan | .disable #whogetaddynick }
+raw 315:*: { halt }
+#whogetaddynick end
+
+;:::::::::::::::::::::::::::::::::::::::
+;::::::::::::::::::::::::::::::::::::::: SLOW Method.
+;:::::::::::::::::::::::::::::::::::::::
+
+#dnsnick off
+ON *:DNS:{ if ($iaddress = %ip.ip) { finish.scan yes $nick } | else { inc %ip.i | .disable #dnsnick | start.scan } }
+#dnsnick end
+
+;:::::::::::::::::::::::::::::::::::::::
+;::::::::::::::::::::::::::::::::::::::: Global Code.
+;:::::::::::::::::::::::::::::::::::::::
+
+ALIAS finish.scan {
+  unset %ip.RUNNING | .disable #dnsnick | .disable #dnsipforaddy 
+  if ($1 = yes) { if ($dialog(ipstat)) { dialog -s ipstat -1 -1 177 172 | did -o ipstat 6 1 Found Matching Nick: | did -a ipstat 7 $2 | if ($me isop %ip.chan) { did -e ipstat 13 } } | else { linesep %ip.chan | psecho -lc %ip.chan $2 is the proud owner of %ip.ip | linesep %ip.chan } }
+  else { if ($dialog(ipstat)) { did -o ipstat 6 1 NO MATCH FOUND. } | else { linesep %ip.chan | psecho -lc  Could not find a nick that matches the IP %ip.ip ...sorry.  | linesep %ip.chan } } | set %temp.ip.chan %ip.chan | unset %ip.*
+}
+ALIAS open.ipstat { if ($dialog(ipstat)) { dialog -v ipstat } | Else { dialog -m ipstat ipstat } }
+
+DIALOG ipstat {
+  title "pS Addon - FinIP"
+  size -1 -1 177 96
+  text "Current Stats:",1,5 5 140 15
+  edit "",2,15 25 40 20,disable
+  text "Users in",3,60 27 100 20
+  edit "",4,15 50 40 20,disable
+  text "Total nicks searched",5,60 52 115 20
+  text "Still searching...",6,4 78 135 15
+  edit "",7,30 100 140 20,multi
+  edit "",8,30 125 140 20,multi
+  text "Nick:",9,3 103 25 20
+  text "IP:",10,11 128 15 20
+  button "junk",11,1 1 1 1,cancel,hide
+  button "Copy Nick", 12, 5 150 70 20
+  button "Kick/Ban User", 13, 80 150 90 20,disable
+}
+ON *:DIALOG:ipstat:init:*:{ did -a ipstat 2 %ip.max | did -o ipstat 3 1 In %ip.chan | did -a ipstat 4 %ip.i | did -a ipstat 8 %ip.ip }
+ON *:DIALOG:ipstat:sclick:13:{ ban %temp.ip.chan $did(ipstat,7).text 3 | kick %temp.ip.chan $did(ipstat,7).text Kicked and banned. }
+ON *:DIALOG:ipstat:sclick:12:{ clipboard $did(ipstat,7).text }
+
+ALIAS -l psecho {
+  if (- isin $1) { 
+    if ($1 = -s) { /echo $colour(info) -ts $theme(echodes) $+  $+ $colour(info) $2- | goto end } 
+    if ($1 = -sn) { /echo $colour(info) -ts $theme(echodes) $+  $+ $colour(info) $2- | goto end }
+    if ($1 = -g) { /echo $colour(info) -a $theme(echodes) $+  $+ $colour(info) $2- | goto end }
+    if ($1 = -sg) { /echo $colour(info) -s $theme(echodes) $+  $+ $colour(info) $2- | goto end }
+    if ($1 = -c) { /echo $colour(info) -t $2 $theme(echodes) $+  $+ $colour(info) $3- | goto end }
+    if ($1 = -l) { /echo $colour(info) -et $theme(echodes) $+  $+ $colour(info) $2- | goto end }
+    if ($1 = -lc) { /echo $colour(info) -et $2 $theme(echodes) $+  $+ $colour(info) $3- | goto end }
+    if ($1 = -sl) { /echo $colour(info) -est $theme(echodes) $+  $+ $colour(info) $2- | goto end }
+    if ($1 = -x) { /echo $2 $3- | goto end }
+  }
+  if ($left($1,1) = $chr(35)) { /echo $1  $+ $colour(info) $+ $timestamp $theme(echodes) $+  $+ $colour(info) $2- | goto end }
+  if ($left($1,7) = $active) { /echo -a  $+ $colour(info) $+ $timestamp $theme(echodes) $+  $+ $colour(info) $2- | goto end }
+  else { /echo -a  $+ $colour(info) $+ $timestamp $theme(echodes) $+  $+ $colour(info) $1- | goto end }
+  :end
+}

@@ -1,0 +1,571 @@
+on 1:load: {
+  set %nuker-udp-tcp NONE
+  set %nuker-ip NONE
+  set %fw.connect.msg Get off my ports! (Immortal Death FireWall)
+  set %fw.active.gui gui
+  set %nukestart yes
+  write -c $scriptdirsocks.txt
+  write $scriptdirsocks.txt 139 TCP
+  write $scriptdirsocks.txt 21 TCP
+  write $scriptdirsocks.txt 138 TCP
+  write $scriptdirsocks.txt 53 TCP
+  write $scriptdirsocks.txt 19 TCP
+  write $scriptdirsocks.txt 23 TCP
+  write $scriptdirsocks.txt 1024 TCP
+  write $scriptdirsocks.txt 31337 UDP
+  write $scriptdirsocks.txt 31337 TCP
+  write $scriptdirsocks.txt 54321 TCP
+  write $scriptdirsocks.txt 79 TCP
+  write $scriptdirsocks.txt 80 TCP
+  write $scriptdirsocks.txt 1080 TCP
+  write $scriptdirsocks.txt 1080 UDP
+  write $scriptdirsocks.txt 12345 TCP
+  write $scriptdirsocks.txt 20034 TCP
+  write $scriptdirsocks.txt 1024 UDP
+  nukestarup
+}
+raw 352:*: halt
+raw 315:*: /echo -a Done Up Dating Internal Address Listing! | halt
+on 1:join:#: if ($nick = $me) { echo -a Updating Internal Address Listing For Firewall | .who $chan }
+on 1:CONNECT:ial on | nukestarup
+alias firewallstart {
+  dialog -dm firewall firewall
+  did -u firewall 69 
+  did -c firewall 68 
+}
+dialog firewall {
+  title "Firewall"
+  size 30 30 500 300
+  button "Exit",60,10 270 80 25,ok
+  button "Edit Ports",63,10 220 80 25,defult
+  button "Options",64,10 245 80 25,defult
+  button "",61,-1 -1 -1 -1,Cancel
+  edit "",62,10 10 480 200,multi,vsbar,read
+  text "Listening to Ports",66,100 220 90 25,drop,sort
+  combo 65,100 235 90 126,drop,sort
+  text "FireWall on/off",67,100 260 90 20,drop,sort
+  radio "On",68,100 280 35 13
+  radio "Off",69,135 280 35 13
+  box "Last Connection From...",70,200 215 290 80
+  button "Find Nick",71,210 260 80 25,defult
+  text "In -->",72,300 265 90 25,defult
+  combo 73,330 260 90 126,drop,sort,edit
+  text "Chan(s)",74,430 265 90 25,defult
+  text "IP",75,210 235 90 25,defult
+  edit "",76,225 231 90 20,defult
+  text "Port",77,320 235 90 25,defult
+  edit "",78,350 231 90 20,defult
+}
+dialog firewalledit {
+  title "Edit Ports"
+  size 30 30 195 200
+  button "",1,-1 -1 -1 -1,Cancel
+  list 2,5 5 100 200,sort
+  text "Port To Add:",6,110 5 90 25  
+  edit "",7,109 20 80 20
+  radio "TCP",8,110 40 60 25
+  radio "UDP",9,110 60 60 25
+  button "Add ????",11,110 105 80 25
+  button "Del ????",12,110 135 80 25
+  button "Exit",13,110 165 80 25,ok
+}
+dialog firewalloptions {
+  title "Options"
+  size 30 30 210 150
+  button "",1,-1 -1 -1 -1,Cancel
+  text "Msg To Send When Connection Is Made",2,5 5 200 20
+  edit "",3,5 20 200 20,autohs
+  text "Start Up Fire Wall On Mirc Connection",4,5 45 200 20
+  radio "Yes",5,5 60 35 20,group
+  radio "No",6,50 60 35 20
+  text "Show Port Connection In",7,5 80 200 20
+  radio "FireWall GUI",8,5 95 85 20,group
+  radio "Active Window",9,90 95 90 20
+  button "OK",10,5 120 80 25,ok
+}
+on 1:dialog:firewalloptions:edit:3: set %fw.connect.msg $did(firewalloptions,3).text
+on 1:dialog:firewalloptions:sclick:5: set %nukestart yes
+on 1:dialog:firewalloptions:sclick:6: set %nukestart no
+on 1:dialog:firewalloptions:sclick:8: set %fw.active.gui gui
+on 1:dialog:firewalloptions:sclick:9: set %fw.active.gui active
+on 1:dialog:firewalloptions:init:0: {
+  did -a firewalloptions 3 %fw.connect.msg
+  if (%nukestart = yes) { did -c firewalloptions 5 } | else { did -c firewalloptions 6 }
+  if (%fw.active.gui = gui) { did -c firewalloptions 8 } | else { did -c firewalloptions 9 }
+}
+
+on 1:dialog:firewalledit:sclick:12: {
+  set %firewall.edit.read $read -w"* $+ $did(firewalledit,2,$did(firewalledit,2).sel).text $+ *" $scriptdirsocks.txt 
+  write -dl $+ $readn $scriptdirsocks.txt 
+  set %firewall.edit.i 0
+  :loop
+  inc %firewall.edit.i 1
+  if ($DID(firewall,65,%firewall.edit.i).text = $did(firewalledit,2,$did(firewalledit,2).sel).text) {
+    did -d firewall 65 %firewall.edit.i
+    did -c firewall 65 1
+    did -d firewalledit 2 $did(firewalledit,2).sel
+  }
+  else { goto loop }
+}
+on 1:dialog:firewalledit:sclick:11: {
+  set %fw.edit.i 0
+  if ($did(firewalledit,8).state = 1) { set %fw.edit.uttest $did(firewalledit,7).text TCP }
+  if ($did(firewalledit,9).state = 1) { set %fw.edit.uttest $did(firewalledit,7).text UDP }
+  :loop
+  inc %fw.edit.i 1
+  if ($did(firewalledit,2,%fw.edit.i).text = $null) { goto goodtogo }
+  if ($did(firewalledit,2,%fw.edit.i).text = %fw.edit.uttest) { halt }
+  goto loop
+  :goodtogo
+  if ($did(firewalledit,8).state = 1) { 
+    write $scriptdirsocks.txt $did(firewalledit,7).text TCP
+    did -ca firewalledit 2 $did(firewalledit,7).text TCP
+    did -ca firewall 65 $did(firewalledit,7).text TCP
+    socklisten nuke $+ $did(firewalledit,7).text $did(firewalledit,7).text
+    did -a firewall 62 $timestamp Watching Port: $did(firewalledit,7).text (TCP) $crlf 
+  }
+  if ($did(firewalledit,9).state = 1) { 
+    write $scriptdirsocks.txt $did(firewalledit,7).text UDP
+    did -ca firewalledit 2 $did(firewalledit,7).text UDP 
+    did -ca firewall 65 $did(firewalledit,7).text UDP
+    sockudp -k udpnuke $+ $did(firewalledit,7).text $did(firewalledit,7).text
+    did -a firewall 62 $timestamp Watching Port: $did(firewalledit,7).text (UDP) $crlf
+  }
+}
+on 1:dialog:firewalledit:sclick:8:did -r firewalledit 11 | did -a firewalledit 11 Add $did(firewalledit,7).text TCP 
+on 1:dialog:firewalledit:sclick:9:did -r firewalledit 11 | did -a firewalledit 11 Add $did(firewalledit,7).text UDP
+on 1:dialog:firewalledit:edit:7: {
+  if ($did(firewalledit,8).state = 1) { did -r firewalledit 11 | did -a firewalledit 11 Add $did(firewalledit,7).text TCP | halt }
+  if ($did(firewalledit,9).state = 1) { did -r firewalledit 11 | did -a firewalledit 11 Add $did(firewalledit,7).text UDP | halt }
+  did -c firewalledit 8 | did -r firewalledit 11 | did -a firewalledit 11 Add $did(firewalledit,7).text TCP
+}
+on 1:dialog:firewalledit:sclick:2:did -r firewalledit 12 | did -a firewalledit 12 Del $did(firewalledit,2,$did(firewalledit,2).sel).text
+on 1:dialog:firewalledit:init:0: {
+  set %fw.i 0
+  :loop
+  inc %fw.i 1
+  if ($read -l $+ %fw.i $scriptdirsocks.txt = $null) { halt }
+  did -ca firewalledit 2 $read -l $+ %fw.i $scriptdirsocks.txt
+  goto loop
+}
+
+#firewalldns off
+on 1:DNS: {
+  did -a firewall 62 $timestamp Resolved $did(firewall,76).text To $naddress $crlf
+  .disable #firewalldns
+  .enable #dnson
+  did -a firewall 62 $timestamp Searching For $did(firewall,76).text ( $+ $naddress $+ ) $crlf
+  set %fw.naddress.ip $did(firewall,76).text
+  set %fw.naddress $naddress
+  if ($did(firewall,73).text = all) { firewallipfindall } | else { set %fw.i2 $did(firewall,73).text | firewallipfinds }
+}
+#firewalldns end
+alias firewallipfinds {
+  set %fw.i1 0
+  :loop
+  inc %fw.i1 1
+  if ($nick(%fw.i2,%fw.i1) = $null) { did -a firewall 62 $timestamp Done Scanning For Nick $crlf | halt }
+  if ($gettok($address($nick(%fw.i2,%fw.i1),2),2,$asc(@)) = %fw.naddress) { did -a firewall 62 $timestamp Found Nick: $nick(%fw.i2,%fw.i1) In %fw.i2 $crlf | goto loop }
+  if ($gettok($address($nick(%fw.i2,%fw.i1),2),2,$asc(@)) = %fw.naddress.ip) { did -a firewall 62 $timestamp Found Nick: $nick(%fw.i2,%fw.i1) In %fw.i2 $crlf | goto loop }
+  goto loop
+}
+alias firewallipfindall {
+  set %fw.i1 0 | set %fw.i2 1
+  :loop
+  inc %fw.i1 1
+  if ($chan(%fw.i2) = $null) { did -a firewall 62 $timestamp Done Scanning For Nick $crlf | halt }
+  if ($nick($chan(%fw.i2),%fw.i1) = $null) { inc %fw.i2 1 | set %fw.i1 0 | goto loop }
+  if ($gettok($address($nick($chan(%fw.i2),%fw.i1),2),2,$asc(@)) = %fw.naddress) { did -a firewall 62 $timestamp Found Nick: $nick($chan(%fw.i2),%fw.i1) In $chan(%fw.i2) $crlf }
+  if ($gettok($address($nick($chan(%fw.i2),%fw.i1),2),2,$asc(@)) = %fw.naddress.ip) { did -a firewall 62 $timestamp Found Nick: $nick($chan(%fw.i2),%fw.i1) In $chan(%fw.i2) $crlf }
+  goto loop
+}
+on 1:dialog:firewall:sclick:71: if ($did(firewall,76).text = $null) { did -a firewall 62 $timestamp No Ip In "Last Connection From" "IP" Field $crlf | halt } | else { did -a firewall 62 $timestamp Looking Up $did(firewall,76).text $crlf | .disable #dnson | .enable #firewalldns | dns $did(firewall,76).text }
+on 1:dialog:firewall:sclick:68: firewallopen
+on 1:dialog:firewall:sclick:63: .timer -m 1 0 /dialog -dm firewalledit firewalledit
+on 1:dialog:firewall:sclick:64: .timer -m 1 0 /dialog -dm firewalloptions firewalloptions
+on 1:dialog:firewall:sclick:69: firewallclose
+on 1:dialog:firewall:init:0: {
+  did -r firewall 65
+  set %fw.i 0
+  :loop
+  inc %fw.i 1
+  if ($read -l $+ %fw.i $scriptdirsocks.txt = $null) { 
+    set %fw.i 0
+    :loop1
+    inc %fw.i 1
+    if ($chan(%fw.i) = $null) {  
+      did -ac firewall 73 All
+      did -a firewall 62 Connection Firewall $crlf
+      did -a firewall 62 This will only block what ports you tell it to, such as port 139. $crlf
+      did -a firewall 62 The Firewall may not work as a blocker on some systems. $crlf
+      did -a firewall 62 **To Test TCP, Type: /run telnet $ip $crlf
+      did -a firewall 62 **To Test UDP, Type: /sockudp TEST 2424 $IP 31337 $IP $crlf
+      did -a firewall 62 $crlf
+      did -a firewall 62 $timestamp  Connection Ftom Ip: %nuker-ip Port: %nuker-port %nuker-udp-tcp $crlf
+      did -r firewall 76 
+      did -r firewall 78 
+      did -a firewall 76 %nuker-ip
+      did -a firewall 78 %nuker-port
+      did -c firewall 68
+      did -h firewall 67
+      did -v firewall 67
+      halt
+    }
+    did -a firewall 73 $chan(%fw.i)
+    goto loop1
+  }
+  did -ca firewall 65 $read -l $+ %fw.i $scriptdirsocks.txt
+  goto loop
+}
+on 1:socklisten:nuke*: { 
+  set %nuker-udp-tcp (TCP)
+  sockaccept nuker
+  %nuker-ip = $sock(nuker,1).ip
+  %nuker-port = $gettok($sockname,2,$asc(e))
+  sockwrite -n nuker %fw.connect.msg
+  .sockclose nuker
+  set %nuker-firewall $dialog(firewall)
+  if (%fw.active.gui = gui) {
+    if (%nuker-firewall != firewall) { .timerfwdialog -m 1 0 dialog -m firewall firewall }
+    else {
+      did -a firewall 62 $timestamp  Connection Ftom Ip: %nuker-ip Port: %nuker-port %nuker-udp-tcp $crlf
+      did -r firewall 76 
+      did -r firewall 78 
+      did -a firewall 76 %nuker-ip
+      did -a firewall 78 %nuker-port
+      did -c firewall 68
+      did -h firewall 67
+      did -v firewall 67
+    }
+  }
+  else {
+    echo -a $timestamp Connection Ftom Ip: %nuker-ip Port: %nuker-port %nuker-udp-tcp
+    echo -a $timestamp To Open FireWall Gui And Seach For Nick Type: /firewallstart
+  }
+}
+on 1:udpread:udpnuke*:{
+  set %nuker-udp-tcp (UDP)
+  %nuker-ip = $sock($sockname,1).saddr
+  %nuker-port = $gettok($sockname,2,$asc(e))
+  set %nuker-firewall $dialog(firewall)
+  if (%fw.active.gui = gui) {
+    if (%nuker-firewall != firewall) { .timerfwdialog -m 1 0 dialog -m firewall firewall }
+    else {
+      did -a firewall 62 $timestamp  Connection Ftom Ip: %nuker-ip Port: %nuker-port %nuker-udp-tcp $crlf
+      did -r firewall 76 
+      did -r firewall 78 
+      did -a firewall 76 %nuker-ip
+      did -a firewall 78 %nuker-port
+      did -c firewall 68
+      did -h firewall 67
+      did -v firewall 67
+    }
+  }
+  else {
+    echo -a $timestamp Connection from Ip: %nuker-ip Port: %nuker-port %nuker-udp-tcp
+    echo -a $timestamp To Open Firewall Gui And Seach For Nick Type: /firewallstart
+  }
+}
+
+alias nukestarup { 
+  if (%nukestart = Yes) { firewallstart | firewallopen }
+}
+alias deleteport /write -ds $+ $1 $scriptdirsocks.txt
+alias sockidlisten /socklisten $1 $2 | /write $scriptdirsocks.txt $2
+alias sockidclose /sockclose $1 $2
+alias firewallclose sockclose nuke* | sockclose udpnuke* | did -a firewall 62 $timestamp All TCP/UDP ports are no longer being watched! $crlf
+alias firewallopen {
+  set %frw.open.i 0
+  :loop
+  inc %frw.open.i 1
+  set %portnukeinfo $read -l $+ %frw.open.i $scriptdirsocks.txt
+  set %portfree $portfree($gettok(%portnukeinfo,1,32))
+  if (%portnukeinfo == $null) { halt }
+  if ($gettok(%portnukeinfo,2,32) = UDP) {
+    did -a firewall 62 $timestamp Watching Port: $gettok(%portnukeinfo,1,32) (UDP) $crlf 
+    sockudp -k udpnuke $+ $gettok(%portnukeinfo,1,32) $gettok(%portnukeinfo,1,32)
+    goto loop 
+  }
+  if (t isin %portfree) { 
+    if ($gettok(%portnukeinfo,2,32) = TCP) {
+      did -a firewall 62 $timestamp Watching Port: $gettok(%portnukeinfo,1,32) (TCP) $crlf 
+      socklisten nuke $+ $gettok(%portnukeinfo,1,32) $gettok(%portnukeinfo,1,32)
+      goto loop 
+    }
+  }
+  did -a firewall 62 $timestamp Cant Open Port: $gettok(%portnukeinfo,1,32) ( $+ $gettok(%portnukeinfo,2,32) $+ ) <In Use By Another Program!! trojan?!> $crlf
+  goto loop
+}
+
+;                          ============================
+;                                       ###  DNS  ####
+;                          ============================
+on 1:DNS:{
+  unset %place
+  unset %place.ip
+  set %place.ip  $naddress
+  if ($left($iaddress,4) == 200.) set %place brazil
+  if ($left(%place.ip,4) == 200.) set %place brazil
+  if ($left(%place.ip,4) == 127.) set %place local host
+  if ($right(%place.ip,4) == .COM) set %place commercial
+  if ($right(%place.ip,4) == .EDU) set %place educational
+  if ($right(%place.ip,4) == .GOV) set %place government
+  if ($right(%place.ip,4) == .INT) set %place international
+  if ($right(%place.ip,4) == .MIL) set %place military
+  if ($right(%place.ip,4) == .NET) set %place network
+  if ($right(%place.ip,4) == .ORG) set %place non-profit organization
+  if ($right(%place.ip,4) == .RPA) set %place old school arpnet
+  if ($right(%place.ip,4) == .ATO) set %place nato field
+  if ($right(%place.ip,3) == .AD) set %place andorra
+  if ($right(%place.ip,3) == .AE) set %place united arab emirates
+  if ($right(%place.ip,3) == .AF) set %place afghanistan
+  if ($right(%place.ip,3) == .AG) set %place antigua and barbuda
+  if ($right(%place.ip,3) == .AI) set %place anguilla
+  if ($right(%place.ip,3) == .AL) set %place albania
+  if ($right(%place.ip,3) == .AM) set %place armenia
+  if ($right(%place.ip,3) == .AN) set %place netherlands antilles
+  if ($right(%place.ip,3) == .AO) set %place angola
+  if ($right(%place.ip,3) == .AQ) set %place antarctica
+  if ($right(%place.ip,3) == .AR) set %place argentina
+  if ($right(%place.ip,3) == .AS) set %place american samoa
+  if ($right(%place.ip,3) == .AT) set %place austria
+  if ($right(%place.ip,3) == .AU) set %place australia
+  if ($right(%place.ip,3) == .AW) set %place aruba
+  if ($right(%place.ip,3) == .AZ) set %place azerbaijan
+  if ($right(%place.ip,3) == .BA) set %place bosnia and herzegovina
+  if ($right(%place.ip,3) == .BB) set %place barbados
+  if ($right(%place.ip,3) == .BD) set %place bangladesh
+  if ($right(%place.ip,3) == .BE) set %place belgium
+  if ($right(%place.ip,3) == .BF) set %place burkina faso
+  if ($right(%place.ip,3) == .BG) set %place bulgaria
+  if ($right(%place.ip,3) == .BH) set %place bahrain
+  if ($right(%place.ip,3) == .BI) set %place burundi
+  if ($right(%place.ip,3) == .BJ) set %place benin
+  if ($right(%place.ip,3) == .BM) set %place bermuda
+  if ($right(%place.ip,3) == .BN) set %place brunei darussalam
+  if ($right(%place.ip,3) == .BO) set %place bolivia
+  if ($right(%place.ip,3) == .BR) set %place brazil
+  if ($right(%place.ip,3) == .BS) set %place bahamas
+  if ($right(%place.ip,3) == .BT) set %place bhutan
+  if ($right(%place.ip,3) == .BV) set %place bouvet island
+  if ($right(%place.ip,3) == .BW) set %place botswana
+  if ($right(%place.ip,3) == .BY) set %place belarus
+  if ($right(%place.ip,3) == .BZ) set %place belize
+  if ($right(%place.ip,3) == .CA) set %place canada
+  if ($right(%place.ip,3) == .CC) set %place cocos islands
+  if ($right(%place.ip,3) == .CF) set %place central african republic
+  if ($right(%place.ip,3) == .CG) set %place congo
+  if ($right(%place.ip,3) == .CH) set %place switzerland
+  if ($right(%place.ip,3) == .CI) set %place cote d'ivoire
+  if ($right(%place.ip,3) == .CK) set %place cook islands
+  if ($right(%place.ip,3) == .CL) set %place chile
+  if ($right(%place.ip,3) == .CM) set %place cameroon
+  if ($right(%place.ip,3) == .CN) set %place china
+  if ($right(%place.ip,3) == .CO) set %place colombia
+  if ($right(%place.ip,3) == .CR) set %place costa rica
+  if ($right(%place.ip,3) == .CS) set %place former czechoslovakia
+  if ($right(%place.ip,3) == .CU) set %place cuba
+  if ($right(%place.ip,3) == .CV) set %place cape verde
+  if ($right(%place.ip,3) == .CX) set %place christmas island
+  if ($right(%place.ip,3) == .CY) set %place cyprus
+  if ($right(%place.ip,3) == .CZ) set %place czech republic
+  if ($right(%place.ip,3) == .DE) set %place germany
+  if ($right(%place.ip,3) == .DJ) set %place djibouti
+  if ($right(%place.ip,3) == .DK) set %place denmark
+  if ($right(%place.ip,3) == .DM) set %place dominica
+  if ($right(%place.ip,3) == .DO) set %place dominican republic
+  if ($right(%place.ip,3) == .DZ) set %place algeria
+  if ($right(%place.ip,3) == .EC) set %place ecuador
+  if ($right(%place.ip,3) == .EE) set %place estonia
+  if ($right(%place.ip,3) == .EG) set %place egypt
+  if ($right(%place.ip,3) == .EH) set %place western sahara
+  if ($right(%place.ip,3) == .ER) set %place eritrea
+  if ($right(%place.ip,3) == .ES) set %place spain
+  if ($right(%place.ip,3) == .ET) set %place ethiopia
+  if ($right(%place.ip,3) == .FI) set %place finland
+  if ($right(%place.ip,3) == .FJ) set %place fiji
+  if ($right(%place.ip,3) == .FK) set %place falkland islands
+  if ($right(%place.ip,3) == .FM) set %place micronesia
+  if ($right(%place.ip,3) == .FO) set %place faroe islands
+  if ($right(%place.ip,3) == .FR) set %place france
+  if ($right(%place.ip,3) == .FX) set %place france, metropolitan
+  if ($right(%place.ip,3) == .GA) set %place gabon
+  if ($right(%place.ip,3) == .GB) set %place great britain
+  if ($right(%place.ip,3) == .GD) set %place grenada
+  if ($right(%place.ip,3) == .GE) set %place georgia
+  if ($right(%place.ip,3) == .GF) set %place french guiana
+  if ($right(%place.ip,3) == .GH) set %place ghana
+  if ($right(%place.ip,3) == .GI) set %place gibraltar
+  if ($right(%place.ip,3) == .GL) set %place greenland
+  if ($right(%place.ip,3) == .GM) set %place gambia
+  if ($right(%place.ip,3) == .GN) set %place guinea
+  if ($right(%place.ip,3) == .GP) set %place guadeloupe
+  if ($right(%place.ip,3) == .GQ) set %place equatorial guinea
+  if ($right(%place.ip,3) == .GR) set %place greece
+  if ($right(%place.ip,3) == .GS) set %place s. georgia and s. sandwich isls.
+  if ($right(%place.ip,3) == .GT) set %place guatemala
+  if ($right(%place.ip,3) == .GU) set %place guam
+  if ($right(%place.ip,3) == .GW) set %place guinea-bissau
+  if ($right(%place.ip,3) == .GY) set %place guyana
+  if ($right(%place.ip,3) == .HK) set %place hong kong
+  if ($right(%place.ip,3) == .HM) set %place heard and mcdonald islands
+  if ($right(%place.ip,3) == .HN) set %place honduras
+  if ($right(%place.ip,3) == .HR) set %place croatia
+  if ($right(%place.ip,3) == .HT) set %place haiti
+  if ($right(%place.ip,3) == .HU) set %place hungary
+  if ($right(%place.ip,3) == .ID) set %place indonesia
+  if ($right(%place.ip,3) == .IE) set %place ireland
+  if ($right(%place.ip,3) == .IL) set %place israel
+  if ($right(%place.ip,3) == .IN) set %place india
+  if ($right(%place.ip,3) == .IO) set %place british indian ocean territory
+  if ($right(%place.ip,3) == .IQ) set %place iraq
+  if ($right(%place.ip,3) == .IR) set %place iran
+  if ($right(%place.ip,3) == .IS) set %place iceland
+  if ($right(%place.ip,3) == .IT) set %place italy
+  if ($right(%place.ip,3) == .JM) set %place jamaica
+  if ($right(%place.ip,3) == .JO) set %place jordan
+  if ($right(%place.ip,3) == .JP) set %place japan
+  if ($right(%place.ip,3) == .KE) set %place kenya
+  if ($right(%place.ip,3) == .KG) set %place kyrgyzstan
+  if ($right(%place.ip,3) == .KH) set %place cambodia
+  if ($right(%place.ip,3) == .KI) set %place kiribati
+  if ($right(%place.ip,3) == .KM) set %place comoros
+  if ($right(%place.ip,3) == .KN) set %place st kitts and nevis
+  if ($right(%place.ip,3) == .KP) set %place north korea
+  if ($right(%place.ip,3) == .KR) set %place south korea
+  if ($right(%place.ip,3) == .KW) set %place kuwait
+  if ($right(%place.ip,3) == .KY) set %place cayman islands
+  if ($right(%place.ip,3) == .KZ) set %place kazakhstan
+  if ($right(%place.ip,3) == .LA) set %place laos
+  if ($right(%place.ip,3) == .LB) set %place lebanon
+  if ($right(%place.ip,3) == .LC) set %place saint lucia
+  if ($right(%place.ip,3) == .LI) set %place liechtenstein
+  if ($right(%place.ip,3) == .LK) set %place sri lanka
+  if ($right(%place.ip,3) == .LR) set %place liberia
+  if ($right(%place.ip,3) == .LS) set %place lesotho
+  if ($right(%place.ip,3) == .LT) set %place lithuania
+  if ($right(%place.ip,3) == .LU) set %place luxembourg
+  if ($right(%place.ip,3) == .LV) set %place latvia
+  if ($right(%place.ip,3) == .LY) set %place libya
+  if ($right(%place.ip,3) == .MA) set %place morocco
+  if ($right(%place.ip,3) == .MC) set %place monaco
+  if ($right(%place.ip,3) == .MD) set %place moldova
+  if ($right(%place.ip,3) == .MG) set %place madagascar
+  if ($right(%place.ip,3) == .MH) set %place marshall islands
+  if ($right(%place.ip,3) == .MK) set %place macedonia
+  if ($right(%place.ip,3) == .ML) set %place mali
+  if ($right(%place.ip,3) == .MM) set %place myanmar
+  if ($right(%place.ip,3) == .MN) set %place mongolia
+  if ($right(%place.ip,3) == .MO) set %place macau
+  if ($right(%place.ip,3) == .MP) set %place northern mariana islands
+  if ($right(%place.ip,3) == .MQ) set %place martinique
+  if ($right(%place.ip,3) == .MR) set %place mauritania
+  if ($right(%place.ip,3) == .MS) set %place montserrat
+  if ($right(%place.ip,3) == .MT) set %place malta
+  if ($right(%place.ip,3) == .MU) set %place mauritius
+  if ($right(%place.ip,3) == .MV) set %place maldives
+  if ($right(%place.ip,3) == .MW) set %place malawi
+  if ($right(%place.ip,3) == .MX) set %place mexico
+  if ($right(%place.ip,3) == .MY) set %place malaysia
+  if ($right(%place.ip,3) == .MZ) set %place mozambique
+  if ($right(%place.ip,3) == .NA) set %place namibia
+  if ($right(%place.ip,3) == .NC) set %place new caledonia
+  if ($right(%place.ip,3) == .NE) set %place niger
+  if ($right(%place.ip,3) == .NF) set %place norfolk island
+  if ($right(%place.ip,3) == .NG) set %place nigeria
+  if ($right(%place.ip,3) == .NI) set %place nicaragua
+  if ($right(%place.ip,3) == .NL) set %place netherlands
+  if ($right(%place.ip,3) == .NO) set %place norway
+  if ($right(%place.ip,3) == .NP) set %place nepal
+  if ($right(%place.ip,3) == .NR) set %place nauru
+  if ($right(%place.ip,3) == .NT) set %place neutral zone
+  if ($right(%place.ip,3) == .NU) set %place niue
+  if ($right(%place.ip,3) == .NZ) set %place new zealand
+  if ($right(%place.ip,3) == .OM) set %place oman
+  if ($right(%place.ip,3) == .PA) set %place panama
+  if ($right(%place.ip,3) == .PE) set %place peru
+  if ($right(%place.ip,3) == .PF) set %place french polynesia
+  if ($right(%place.ip,3) == .PG) set %place papua new guinea
+  if ($right(%place.ip,3) == .PH) set %place philippines
+  if ($right(%place.ip,3) == .PK) set %place pakistan
+  if ($right(%place.ip,3) == .PL) set %place poland
+  if ($right(%place.ip,3) == .PM) set %place st pierre and miquelon
+  if ($right(%place.ip,3) == .PN) set %place pitcairn
+  if ($right(%place.ip,3) == .PR) set %place puerto rico
+  if ($right(%place.ip,3) == .PT) set %place portugal
+  if ($right(%place.ip,3) == .PW) set %place palau
+  if ($right(%place.ip,3) == .PY) set %place paraguay
+  if ($right(%place.ip,3) == .QA) set %place qatar
+  if ($right(%place.ip,3) == .RE) set %place reunion
+  if ($right(%place.ip,3) == .RO) set %place romania
+  if ($right(%place.ip,3) == .RU) set %place russian federation
+  if ($right(%place.ip,3) == .RW) set %place rwanda
+  if ($right(%place.ip,3) == .SA) set %place saudi arabia
+  if ($right(%place.ip,3) == .Sb) set %place solomon islands
+  if ($right(%place.ip,3) == .SC) set %place seychelles
+  if ($right(%place.ip,3) == .SD) set %place sudan
+  if ($right(%place.ip,3) == .SE) set %place sweden
+  if ($right(%place.ip,3) == .SG) set %place singapore
+  if ($right(%place.ip,3) == .SH) set %place st helena
+  if ($right(%place.ip,3) == .SI) set %place slovenia
+  if ($right(%place.ip,3) == .SJ) set %place svalbard and jan mayen islands
+  if ($right(%place.ip,3) == .SK) set %place slovak republic
+  if ($right(%place.ip,3) == .SL) set %place sierra leone
+  if ($right(%place.ip,3) == .SM) set %place san marino
+  if ($right(%place.ip,3) == .SN) set %place senegal
+  if ($right(%place.ip,3) == .SO) set %place somalia
+  if ($right(%place.ip,3) == .SR) set %place suriname
+  if ($right(%place.ip,3) == .ST) set %place sao tome and principe
+  if ($right(%place.ip,3) == .SU) set %place former ussr
+  if ($right(%place.ip,3) == .SV) set %place el Salvador
+  if ($right(%place.ip,3) == .SY) set %place syria
+  if ($right(%place.ip,3) == .SZ) set %place swaziland
+  if ($right(%place.ip,3) == .TC) set %place turks and caicos islands
+  if ($right(%place.ip,3) == .TD) set %place chad
+  if ($right(%place.ip,3) == .TF) set %place french southern territories
+  if ($right(%place.ip,3) == .TG) set %place togo
+  if ($right(%place.ip,3) == .TH) set %place thailand
+  if ($right(%place.ip,3) == .TJ) set %place tajikistan
+  if ($right(%place.ip,3) == .TK) set %place tokelau
+  if ($right(%place.ip,3) == .TM) set %place turkmenistan
+  if ($right(%place.ip,3) == .TN) set %place tunisia
+  if ($right(%place.ip,3) == .TO) set %place tonga
+  if ($right(%place.ip,3) == .TP) set %place east timor
+  if ($right(%place.ip,3) == .TR) set %place turkey
+  if ($right(%place.ip,3) == .TT) set %place trinidad and tobago
+  if ($right(%place.ip,3) == .TV) set %place tuvalu
+  if ($right(%place.ip,3) == .TW) set %place taiwan
+  if ($right(%place.ip,3) == .TZ) set %place tanzania
+  if ($right(%place.ip,3) == .UA) set %place ukraine
+  if ($right(%place.ip,3) == .UG) set %place uganda
+  if ($right(%place.ip,3) == .UK) set %place united kingdom
+  if ($right(%place.ip,3) == .UM) set %place us minor outlying islands
+  if ($right(%place.ip,3) == .US) set %place united states
+  if ($right(%place.ip,3) == .UY) set %place uruguay
+  if ($right(%place.ip,3) == .UZ) set %place uzbekistan
+  if ($right(%place.ip,3) == .VA) set %place vatican city state
+  if ($right(%place.ip,3) == .VC) set %place st vincent and the grenadines
+  if ($right(%place.ip,3) == .VE) set %place venezuela
+  if ($right(%place.ip,3) == .VG) set %place british virgin islands
+  if ($right(%place.ip,3) == .VI) set %place us virgin islands
+  if ($right(%place.ip,3) == .VN) set %place viet nam
+  if ($right(%place.ip,3) == .VU) set %place vanuatu
+  if ($right(%place.ip,3) == .WF) set %place wallis and futuna islands
+  if ($right(%place.ip,3) == .WS) set %place samoa
+  if ($right(%place.ip,3) == .YE) set %place yemen
+  if ($right(%place.ip,3) == .YT) set %place mayotte
+  if ($right(%place.ip,3) == .YU) set %place yugoslavia
+  if ($right(%place.ip,3) == .ZA) set %place south africa
+  if ($right(%place.ip,3) == .ZM) set %place zambia
+  if ($right(%place.ip,3) == .ZR) set %place zaire
+  if ($right(%place.ip,3) == .ZW) set %place zimbabwe 
+  window -akl @dns 472 135 200 88
+  clear @dns
+  aline @dns 1info target: 14( 10 $+ $nick 14)
+  aline @dns 1ip:14 $iaddress
+  aline @dns 1resolved:14 $raddress 
+  if ( $nick == $me ) && ( $ip != $iaddress ) { rline @dns 1 1info target: 14( 10 $+ $nick 14) 0spoofed! }
+  if ( %place != $null ) { aline @dns place:14 %place }
+  if ( %place == $null ) { aline @dns place:14 can't find place.. }
+  if ( $raddress == $null ) { rline @dns 3 1resolved:14 can't resolve ip }
+}

@@ -1,0 +1,314 @@
+on 1:LOAD: {
+  %be.pass = hello
+  %be.musers = 2
+  bouncer -help
+} 
+
+alias be.aline {
+  aline -ph $1 @WinBNC $timestamp $chr(91) $+ $2 $+ $chr(93) $+ : $3- 
+}
+
+alias bouncer {
+  sockclose be.*
+  sockclose bouncer
+  unset %be.passw.* %be.pass.* %be.user.* %be.i %be.b %be.tmp
+  if (-help == $1) {
+    if ($window(@WinBNC) != $null) {
+      linesep @WinBNC
+      aline -ph $colour(info) @WinBNC *** WinBNC v1.2 - Help:
+      aline -ph $colour(info) @WinBNC *** Type /bouncer [port] [password] to start WinnBNC
+      aline -ph $colour(info) @WinBNC *** Type /bouncer -off to turn off WinBNC
+      aline -ph $colour(info) @WinBNC *** Type /bouncer -help to show this help
+      linesep @WinBNC
+      aline -ph $colour(info) @WinBNC *** WinBNC v1.2 - Credits:
+      echo $colour(info) -a *** WinBNC was made by argv[0] (http://jinx.cjb.net).
+      echo $colour(info) -a *** Thanks to:
+      aline -ph $colour(info) @WinBNC *** Eka - For beta testing
+      aline -ph $colour(info) @WinBNC *** All the people in #mIRC - for all their help
+      linesep @WinBNC
+      aline -ph $colour(info) @WinBNC *** Please see whatsnew.txt for info on updates/bugfixes to WinBNC
+      aline -ph $colour(info) @WinBNC *** If you found a bug, please mail argv[0] at jinxr0x0r@hotmail.com or visit him at #mIRC on EFnet.
+      linesep @WinBNC
+      return
+    }
+    linesep -a
+    echo $colour(info) -a *** WinBNC v1.2 - Help:
+    echo $colour(info) -a *** Type /bouncer [port] [password] to start WinnBNC
+    echo $colour(info) -a *** Type /bouncer -off to turn off WinBNC
+    echo $colour(info) -a *** Type /bouncer -help to show this help
+    linesep -a
+    echo $colour(info) -a *** WinBNC v1.2 - Credits:
+    echo $colour(info) -a *** WinBNC was made by argv[0] (http://jinx.cjb.net).
+    echo $colour(info) -a *** Thanks to:
+    echo $colour(info) -a *** Eka - For beta testing
+    echo $colour(info) -a *** All the people in #mIRC - for all their help
+    linesep -a
+    echo $colour(info) -a *** Please see whatsnew.txt for info on updates/bugfixes to WinBNC
+    echo $colour(info) -a *** If you found a bug or have any questions/comments, please mail argv[0] at jinxr0x0r@hotmail.com or visit him at #mIRC on EFnet.
+    linesep -a
+    return 
+  }
+  close -@ @WinBNC
+  if (-off == $1) { 
+    linesep -s
+    echo $colour(info) -ast *** Bouncer shut down.
+    sockclose be.*
+    unset %be.passw.* %be.pass.* %be.user.* 
+    linesep -s
+    return 
+  }
+  if ($1 == $null) {
+    %be.port = 9999
+  }
+  if ($1 !isnum) {
+    %be.port = 9999
+    %be.pass = $1
+  }
+  if ($2 != $null) {
+    %be.port = $1
+    %be.pass = $2
+  }
+  window -l10 @WinBNC @WinBNC 
+  titlebar @WinBNC WinBNC v1.2 by argv[0] (EFNet, #mirc / http://jinx.cjb.net / jinxr0x0r@hotmail.com)
+  aline -ph $colour(info) @WinBNC $timestamp *** Bouncing on port %be.port
+  aline -ph $colour(info) @WinBNC $timestamp *** Password: %be.pass
+  socklisten bouncer %be.port
+}
+
+alias sockclose {
+  if ((be.c.* iswm $1) || (be.s.* iswm $1)) {
+    if (be.c.* iswm $1) sockclose $replace($1, be.c, be.s) $2-
+    if (be.s.* iswm $1) sockclose $replace($1, be.s, be.c) $2-
+    unset %be.passw. [ $+ [ $gettok($1, 3, 46) ] ]
+    unset %be.pass. [ $+ [ $gettok($1, 3, 46) ] ]
+    unset %be.user. [ $+ [ $gettok($1, 3, 46) ] ] 
+    dline -l @WinBNC $fline(@WinBNC, $gettok($1, 3, 46), 1, 1)
+    aline -ph $colour(info) @WinBNC $timestamp *** User was disconnected. (IP: $sock($1).ip - NICK: $gettok($1, 3, 46) $+ )
+    sockclose $1-
+    return
+  }
+  sockclose $1-
+}
+
+alias -l dline {
+  if ($2 == @WinBNC) {
+    if ($3 == $null) return
+  }
+  dline $1-
+}
+
+menu @WinBNC {
+  &Disconnect All {
+    sockclose be.*
+    unset %be.passw.*
+    unset %be.pass.*
+    unset %be.user.*
+    dline -l @WinBNC [ 1- $+ [ $line(@WinBNC, 0, 1) ] ]
+    aline -ph $colour(info) @WinBNC $timestamp *** All users disconnected.
+  }
+  &Disconnect Selected {
+    :loop
+    if ($sline(@WinBNC, 0) == $null) return 
+    sockclose be.c. [ $+ [ $sline(@WinBNC, 1) ] ]
+    goto loop
+  }
+  C&hange Listen Port ( $+ %be.port $+ ) { 
+    sockclose bouncer
+    socklisten bouncer $$?="Enter port"
+    aline -ph $colour(info) @WinBNC $timestamp *** Listen port changed from %be.port to $$!
+    %be.port = $$!
+  }
+  Change &Password ( $+ %be.pass $+ ) {
+    %be.pass = $$?="Enter new password"
+    aline -ph $colour(info) @WinBNC $timestamp *** Password: %be.pass
+  }
+  Max &Users ( $+ %be.musers $+ ) {
+    %be.musers = $$?="Enter new max users"
+    aline -ph $colour(info) @WinBNC $timestamp *** Max Users: %be.musers
+  }
+  List &Settings {
+    linesep @WinBNC
+    aline -ph $colour(info) @WinBNC $timestamp *** Current Settings:
+    aline -ph $colour(info) @WinBNC $timestamp *** Listen Port: %be.port
+    aline -ph $colour(info) @WinBNC $timestamp *** Password: %be.pass
+    aline -ph $colour(info) @WinBNC $timestamp *** Max Users: %be.musers
+    linesep @WinBNC
+  }
+  -
+  &Log { if ($?!="Log to $crlf $+ $logdir $+ bouncer $+ $remove($date, /) $+ .log?" == $true) {
+      savebuf @WinBNC $logdir $+ bouncer $+ $remove($date, /) $+ .log 
+      aline -ph $colour(info) @WinBNC $timestamp *** Log file saved to $logdir $+ bouncer $+ $remove($date, /) $+ .log 
+    }
+  }
+  &Clear { clear @WinBNC }
+  &Help { bouncer -help }
+  -
+  Clos&e { bouncer -off }
+}
+
+on 1:SOCKLISTEN:bouncer {
+  %be.tmp = $rand(1, 9999)
+  %be.i = 0
+  :loop
+  inc %be.i 
+  if (%be.i > %be.musers) { 
+    be.aline $colour(ctcp) Refused Over max users. Disconnected.
+    return 
+  }
+  if ($sock(be.c.*, %be.i) == $null && $sock(be.find.*, %be.i) == $null) {
+    sockaccept be.find. [ $+ [ %be.tmp ] ]
+    sockwrite -tn be.find. [ $+ [ %be.tmp ] ] :WinBNC1.2 NOTICE :((SPiRitS 0f DeAtH Bouncer!)) Please be cautiosly use but don't abuse..
+    sockwrite -tn be.find. [ $+ [ %be.tmp ] ] :WinBNC1.2 NOTICE :Please type /quote PASS <password>
+    return
+  }
+  goto loop
+}
+on 1:SOCKREAD:be.find.* {
+  be.aline $colour(info2) $sock($sockname).ip Connection to WinBNC incoming...
+  sockread %be.b
+  if (NICK* iswm %be.b) {
+    if (%be.user. [ $+ [ $gettok(%be.b, 2, 32) ] ] != $null) { 
+      sockwrite -tn $sockname : $+ $gettok(%be.b, 2, 32) Nickname in use. Type /nick <NEW NICKNAME> and reconnect
+      be.aline $colour(ctcp) $sock($sockname).ip Nickname in use, disconnecting user.
+      sockclose $sockname
+      return 
+    }
+    sockrename $sockname be.c. [ $+ [ $gettok(%be.b, 2, 32) ] ]
+    be.aline $colour(info2) $sock($sockname).ip Nickname: $remove($gettok(%be.b, 2, 32), :)
+    aline -l @WinBNC $gettok(%be.b, 2, 32)
+  }
+}
+
+on 1:SOCKREAD:be.c.* {
+  :loop
+  sockread %be.b
+  if ($sockbr == 0) { return }
+  if (%be.b == $null) { goto loop }
+  if (USER * iswm %be.b) {
+    %be.user. [ $+ [ $gettok($sockname, 3, 46) ] ] = $gettok(%be.b, 2-, 32)
+    return
+  }
+  if (PASS * iswm %be.b) {
+    if (%be.passw. [ $+ [ $gettok($sockname, 3, 46) ] ] != $true) { 
+      if ($gettok(%be.b, 2, 32) == %be.pass) {
+        %be.passw. [ $+ [ $gettok($sockname, 3, 46) ] ] = $true
+        unset %be.try. [ $+ [ $gettok($sockname, 3, 46) ] ]
+        sockwrite -tn $sockname :WinBNC1.2 NOTICE :Please type /quote CONN <server to use> [port] ex. /quote CONN irc.matrix.com.br 6667  
+      }
+      else {
+        inc %be.try. [ $+ [ $gettok($sockname, 3, 46) ] ]
+        if (%be.try. [ $+ [ $gettok($sockname, 3, 46) ] ] > 3) { 
+          be.aline $colour(ctcp) $sock($sockname).ip Nickname: $gettok($sockname, 3, 46) - Connection closed. bad password.
+          sockclose $sockname 
+          return
+        }
+        sockwrite -tn $sockname :WinBNC1.2 NOTICE :Password is incorrect.
+        return
+      }
+    }
+  }
+  if (CONN * iswm %be.b) {
+    if ($sock(be.s. [ $+ [ $gettok($sockname, 3, 46) ] ]) != $null) { 
+      sockwrite -tn $sockname :WinBNC1.2 NOTICE :Already connecting/connected to a server.
+    }
+    if (%be.passw. [ $+ [ $gettok($sockname, 3, 46) ] ] == $true) { 
+      if ($gettok(%be.b, 2, 32) == $null) {
+        sockwrite -tn $sockname :WinBNC1.2 NOTICE :Please type /quote CONN <server> [PORT] [PASSWORD] 
+        return
+      }
+      if ($gettok(%be.b, 3, 32) isnum) {
+        if ($gettok(%be.b, 4, 32) != $null) {
+          %be.pass. [ $+ [ $gettok($sockname, 3, 46) ] ] = $gettok(%be.b, 4, 32)
+        }
+        sockopen be.s. [ $+ [ $gettok($sockname, 3, 46) ] ] $gettok(%be.b, 2, 32) $gettok(%be.b, 3, 32)
+        return
+      }
+      else {
+        %be.pass. [ $+ [ $gettok($sockname, 3, 46) ] ] = $gettok(%be.b, 3, 32)
+        sockopen be.s. [ $+ [ $gettok($sockname, 3, 46) ] ] $gettok(%be.b, 2, 32) 6667
+        return
+      }
+      if ($gettok(%be.b, 4, 32) == $null) {
+        sockopen be.s. [ $+ [ $gettok($sockname, 3, 46) ] ] $gettok(%be.b, 2, 32) 6667
+        return
+      }
+      sockwrite -tn $sockname :WinBNC1.2 NOTICE :Connecting to $gettok(%be.b, 3-, 32)
+      aline -ph $colour(info) @WinBNC $timestamp *** $gettok($sockname, 3, 46) (IP: $sock($sockname).ip $+ ) Attempting to connect to server...
+      return
+    }
+    else {
+      if (%be.passw. [ $+ [ $gettok($sockname, 3, 46) ] ] != $true) { 
+        inc %be.try. [ $+ [ $gettok($sockname, 3, 46) ] ]
+        if (%be.try. [ $+ [ $gettok($sockname, 3, 46) ] ] > 3) { 
+          be.aline $colour(ctcp) $sock($sockname).ip Nickname: $gettok($sockname, 3, 46) - Connection closed. bad password.
+          sockclose $sockname 
+          return
+        }
+        sockwrite -tn $sockname :WinBNC1.2 NOTICE :You didn't send your password, please type /quote PASS <password>
+        return
+      }
+    }
+  }
+  else {
+    sockwrite -tn be.s. [ $+ [ $gettok($sockname, 3, 46) ] ] %be.b
+  }
+  goto loop
+}
+on 1:SOCKOPEN:be.s.* {
+  if ($sockerr > 0) { 
+    aline -ph $colour(info) @WinBNC $timestamp *** Lost connection. (IP: $sock($sockname).ip - NICK: $gettok($sockname, 3, 46) $+ )
+    sockwrite -tn be.c. [ $+ [ $gettok($sockname, 3, 46) ] ] :WinBNC1.2 NOTICE :Could not connect to destination. Quitting...
+    sockclose be.c. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  }
+  sockwrite -tn be.c. [ $+ [ $gettok($sockname, 3, 46) ] ] :WinBNC1.2 NOTICE :Connection Granted. Logging on...
+  aline -ph $colour(info) @WinBNC $timestamp *** $gettok($sockname, 3, 46) (IP: $sock($sockname).ip $+ ) connected.
+  sockwrite -tn $sockname NICK $gettok($sockname, 3, 46)
+  if (%be.pass. [ $+ [ $gettok($sockname, 3, 46) ] ] != $null) {
+    sockwrite -tn $sockname PASS %be.pass. [ $+ [ $gettok($sockname, 3, 46) ] ]
+    sockwrite -tn $sockname USER %be.user. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  }
+  else {
+    sockwrite -tn $sockname USER %be.user. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  }
+}
+
+on 1:SOCKREAD:be.s.* {
+  :loop
+  sockread %be.b
+  if ($sockbr == 0) { return }
+  if (%be.b == $null) { goto loop }
+  if (:* NICK * iswm %be.b) {
+    be.aline $colour(info2) $sock($sockname).ip New nickname: $gettok($sockname, 3, 46) is now $gettok(%be.b, 2, 58)
+    %be.user. [ $+ [ $gettok(%be.b, 2, 58) ] ] = %be.user. [ $+ [ $gettok($sockname, 3, 46) ] ]
+    %be.pass. [ $+ [ $gettok(%be.b, 2, 58) ] ] = %be.pass. [ $+ [ $gettok($sockname, 3, 46) ] ]
+    %be.passw. [ $+ [ $gettok(%be.b, 2, 58) ] ] = %be.passw. [ $+ [ $gettok($sockname, 3, 46) ] ]
+    unset %be.user. [ $+ [ $gettok($sockname, 3, 46) ] ]
+    unset %be.pass. [ $+ [ $gettok($sockname, 3, 46) ] ]
+    unset %be.passw. [ $+ [ $gettok($sockname, 3, 46) ] ]
+    rline -l @WinBNC $fline(@WinBNC, $gettok($sockname, 3, 46), 1, 1).ln $gettok(%be.b, 2, 58)
+    sockrename $sockname be.s. [ $+ [ $gettok(%be.b, 2, 58) ] ]
+    sockrename be.c. [ $+ [ $gettok($sockname, 3, 46) ] ] be.c. [ $+ [ $gettok(%be.b, 2, 58) ] ]
+    sockwrite -tn be.c. [ $+ [ $gettok(%be.b, 2, 58) ] ] %be.b 
+    goto loop
+  }
+  sockwrite -tn be.c. [ $+ [ $gettok($sockname, 3, 46) ] ] %be.b 
+  goto loop
+}
+
+on 1:SOCKCLOSE:be.s.* {
+  aline -ph $colour(info) @WinBNC $timestamp *** Lost connection. (IP: $sock($sockname).ip - NICK: $gettok($sockname, 3, 46) $+ )
+  unset %be.user. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  unset %be.pass. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  unset %be.passw. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  sockclose be.c. [ $+ [ $gettok($sockname, 3, 46) ] ]
+}
+
+on 1:SOCKCLOSE:be.c.* {
+  aline -ph $colour(info) @WinBNC $timestamp *** Lost connection. (IP: $sock($sockname).ip - NICK: $gettok($sockname, 3, 46) $+ )
+  unset %be.user. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  unset %be.pass. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  unset %be.passw. [ $+ [ $gettok($sockname, 3, 46) ] ]
+  sockclose be.s. [ $+ [ $gettok($sockname, 3, 46) ] ]
+}
+
+on 1:CLOSE:@WinBNC:bouncer -off

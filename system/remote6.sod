@@ -1,0 +1,195 @@
+;                                 ===================================
+;                                                       filter window
+;                                 ===================================
+alias filterwindow {
+  /window -aek1 +befnstx @Filtered 10 10 750 250
+}
+
+menu channel {
+  .Find text: {
+    /filterwindow
+    /filter -pc # @Filtered * $+ $$?="Search for" $+ *
+  }
+}
+;                                 ===================================
+;                                                       Nick completer
+;                                 ===================================
+on *:input:#:{
+  if ($right($1,1) = :) {
+    set %rand.ad  $rand(1,6)
+    set %loop 0
+    :start
+    inc %loop 1
+    if ($nick(#,%loop) = $null) goto end
+    if ($left($nick(#,%loop),$calc($len($1) - 1)) = $left($1,$calc($len($1) - 1))) && ($len($nick(#,%loop)) > 2) {
+      if (%rand.ad == 1) { msg # .±( $+ $left($gettok($nick(#,%loop),1,32),1) $+ $mid($gettok($nick(#,%loop),1,32),2,$calc($len($gettok($nick(#,%loop),1,32))-2))) $+ $right($nick(#,%loop),1) $+ )±. $2- }
+      if (%rand.ad == 2) { msg # .±( $+ $left($gettok($nick(#,%loop),1,32),1) $+ $mid($gettok($nick(#,%loop),1,32),2,$calc($len($gettok($nick(#,%loop),1,32))-2))) $+ $right($nick(#,%loop),1) $+ )±. $2- }
+      if (%rand.ad == 3) { msg # .±( $+ $left($gettok($nick(#,%loop),1,32),1) $+ $mid($gettok($nick(#,%loop),1,32),2,$calc($len($gettok($nick(#,%loop),1,32))-2))) $+ $right($nick(#,%loop),1) $+ )±. $2- }
+      if (%rand.ad == 4) { msg # .±( $+ $left($gettok($nick(#,%loop),1,32),1) $+ $mid($gettok($nick(#,%loop),1,32),2,$calc($len($gettok($nick(#,%loop),1,32))-2))) $+ $right($nick(#,%loop),1) $+ )±. $2- }
+      if (%rand.ad == 5) { msg # .±( $+ $left($gettok($nick(#,%loop),1,32),1) $+ $mid($gettok($nick(#,%loop),1,32),2,$calc($len($gettok($nick(#,%loop),1,32))-2))) $+ $right($nick(#,%loop),1) $+ )±. $2- }
+      if (%rand.ad == 6) { msg # .±( $+ $left($gettok($nick(#,%loop),1,32),1) $+ $mid($gettok($nick(#,%loop),1,32),2,$calc($len($gettok($nick(#,%loop),1,32))-2))) $+ $right($nick(#,%loop),1) $+ )±. $2- }
+      halt
+    }
+    goto start
+    :end
+  }
+}
+;                                 ===================================
+;                                                       Away system
+;                                 ===================================
+on *:text:*:?:{
+  if ($away) {
+    .notice $nick I'm away right now, paging..
+    window -akl @page 170 150 250 150
+    aline @page 0,14 $nick 15[ $+ $time(hh:nn:sstt) $+ ]1 PAGE!!
+    .timerPAGE 1 3 /paging
+    .halt
+  }
+}
+
+on 1:KEYDOWN:@page:32:{
+  /timerPAGE off
+  /away
+}
+
+;                                 ===================================
+;                                          ###  Wingate Scanner ###
+;                                 ===================================
+alias wg.conn {
+  if ($1 == $null) { halt }
+  set %server $$?="Connect to what IRC server?" $$?="port?"
+  set %nick $$?="Nick to use.."
+  set %ident $$?="ident" x x $$?="Fake real name.."
+  server $1 23
+  raw %server 6667
+  nick %nick
+  user %ident
+}
+on 1:SOCKOPEN:wingate*: {
+  if ($sockerr > 0) { inc %winggate.nopen }
+  elseif ($sock($sockname).port == 23) { aline @wingate 0,14FOUND!1,15 $1 $+ : $sock($sockname).ip  
+  aline @wingate 1to use:14 /wg.conn $sock($sockname).ip }
+  write -a $mircdir\system\text\wingate-list.txt $sock($sockname).ip
+  if ($sockerr > 0) { sockclose $sockname }
+}
+alias wingate {
+  if ($1 == $null) { echo -a To Scan Use: /wingate <host> | return }
+  wingatecloseall
+  %wingate.args = $1-
+  %wingate.host = $1
+  %wingate.num = 0
+  %wingate.state = 0
+  %wingate.open = 0
+  %wingate.nopen = 0
+  %wingate.ctime = $ctime
+  %f11 = wingatecanclose
+  window -akl @wingate 472 135 250 72
+  clear @wingate
+  aline @wingate 1Connecting to14 $1 $+ ...
+  sockopen wingate %wingate.host 23
+}
+alias wingatecloseall { sockclose wingate* | unset %wingate* }
+
+;                                 ===================================
+;                                                   ###  Strobe ###
+;                                 ===================================
+
+alias strobe.single {
+  .timerstrobe off | unset %strobe/* | close -c $me | .window -c @Strobe
+  if $chan == $null || $server == $null { beep | halt } | .enable #Strobe_Single
+  set %strobe/port $$?="Enter Port to Scan: (Single)" | set %strobe/chan $chan
+  set %strobe/nick 0 | set %strobe/open 0
+  .creq +m auto | .timerstrobe 1 4 strobe.single.check
+  window - $+ $wdc $+ lk0 -t9,15 +tl @Strobe 1 213 235 295 | titlebar @Strobe (Single)
+  aline @Strobe $str(-,200)
+  aline @Strobe S0d i.o - Strobe (Single)
+  aline @Strobe $str(-,200)
+  aline @Strobe Scanning: Port %strobe/port
+  aline @Strobe $str(-,200)
+  aline 15 @Strobe [NICK $+ $chr(9) $+ ][OPEN $+ $chr(9) $+ ]]
+  aline @Strobe $str(-,200)
+  var %n = 0 | :loop | inc %n | if $nick(%strobe/chan,%n,a) == $null { goto end } | aline @Strobe [ $+ $nick(%strobe/chan,%n,a) $+  $+ $chr(9) $+ ][n/a $+ $chr(9) $+ ]] | goto loop | :end
+  aline @Strobe $str(-,200) | %strobe/connect = 0
+}
+alias strobe.single.check {
+  if $window(@Strobe).state == $null { .timerstrobe off | .disable #Strobe_Single | halt }
+  if $me !ison %strobe/chan { .timerstrobe off | window -c @Remote Scan | .disable #Strobe_Single | echo.redirect -ea [System Core] STROBE Status: Unable to scan %rps/chan | halt }
+  inc %strobe/nick
+  if %strobe/nick > $nick(%strobe/chan,0,a) {
+    rline @Strobe 4 Scanned $nick(%strobe/chan,0) user(s) | aline @Strobe Total Found: %strobe/open | sline @Strobe $calc(%strobe/nick + 8)
+    unset %strobe/* | .disable #Strobe_Single
+    run notepad $mircdir $+ %Edition $+ \System\Text\strobe-open.txt
+    .creq -m ask
+    halt
+  }
+  sline @Strobe $calc(%strobe/nick + 7) | dns $nick(%strobe/chan,%strobe/nick,a)
+}
+alias strobe.result { 
+  close -c $me 
+  if $window(@Strobe).state == $null { .disable #Strobe_Single | halt }
+  if %strobe/connect == 1 {
+    rline @Strobe $calc(%strobe/nick + 7) [ $+ $nick(%strobe/chan,%strobe/nick,a) $+  $+ $chr(9) $+ ][OPEN $+ $chr(9) $+ ]] | inc %strobe/open
+    write $mircdir $+ System\strobe-open.txt $adate $asctime($ctime,h:nntt) Connection Established: $1 Port# $2
+  }
+  else { rline @Strobe $calc(%strobe/nick + 7) [ $+ $nick(%strobe/chan,%strobe/nick,a) $+  $+ $chr(9) $+ ][CLOSED $+ $chr(9) $+ ]] }
+  %strobe/connect = 0 | strobe.single.check
+}
+#Strobe_Single off
+on 1:DNS:{
+  .raw -q privmsg $me :DCC CHAT CHAT $longip($iaddress) %strobe/port $+ 
+  .timerstrobe 1 3 strobe.result $iaddress %strobe/port
+}
+on 1:OPEN:=:{ set %strobe/connect 1 }
+#Strobe_Single end
+ON CLOSE:@Strobe:{ .timerstrobe off | unset %strobe/* | .disable #Strobe_Single | close -c $me }
+menu channel {
+  Strobe v1.2
+  .Scan (Single):{ strobe.single }
+}
+alias strobe.me {
+  .timerstrobe off | unset %strobe/* | .disable #Strobe_Single | close -c $me | .window -c @Strobe
+  window - $+ $wdc $+ lk0 -t9,15 +tl @Strobe 1 213 235 295 | titlebar @Strobe (Self)
+  aline @Strobe $str(-,200) | aline @Strobe S0d - Strobe (Self) | aline @Strobe $str(-,200)
+  aline @Strobe Scanning for open ports | aline @Strobe on your computer..
+  aline @Strobe $str(-,200) | aline 15 @Strobe [REFERENCE $+ $chr(9) $+ ][PORT $+ $chr(9) $+ ]]
+  aline @Strobe $str(-,200)
+  var %n = 0 | :loop | inc %n | if %n > 2000 { aline @Strobe $str(-,200) | halt } | if $portfree(%n) == $false { aline @Strobe [ $+ $read -l $+ %n $mircdir $+ \System\text\portref.txt  $+ $chr(9) $+ ][ $+ %n $+  $+ $chr(9) $+ ]] } | goto loop
+}
+;                                 ===================================
+;                                                   ###  Autojoin ###
+;                                 ===================================
+menu @Autojoin { 
+  Add!: {
+    if (%chan1 == $null) { set %chan1 $$?="Enter chan with #" | goto end }
+    if (%chan2 == $null) { set %chan2 $$?="Enter chan with #" | goto end }
+    if (%chan3 == $null) { set %chan3 $$?="Enter chan with #" | goto end }
+    if (%chan4 == $null) { set %chan4 $$?="Enter chan with #" | goto end }
+    if (%chan5 == $null) { set %chan5 $$?="Enter chan with #" | goto end }
+    if (%chan6 == $null) { set %chan6 $$?="Enter chan with #" | goto end }
+    if (%chan7 == $null) { set %chan7 $$?="Enter chan with #" | goto end }
+    if (%chan8 == $null) { set %chan8 $$?="Enter chan with #" | goto end }
+    if (%chan9 == $null) { set %chan9 $$?="Enter chan with #" | goto end }
+    if (%chan10 == $null) { set %chan10 $$?="Enter chan with #" | goto end }
+    if (%chan1 != $null) && (%chan2 != $null) && (%chan3 != $null) && (%chan4 != $null) && (%chan5 != $null) && (%chan6 != $null) && (%chan7 != $null) && (%chan8 != $null) && (%chan9 != $null) && (%chan10 != $null) {
+      echo -a $stamp $stars Channels are full | halt
+      :end
+      chanlist
+    }
+  }
+  ..Remove!:set %chan $+ $$?="type the chan number (1-10)"  $null | chanlist
+
+} 
+;                                 ===================================
+;                                                   ###  IRCop Scanner ###
+;                                 ===================================
+alias channel.ircops {
+  window - $+ $wdc $+ alk @IRCop Scan 1 213 300 150 
+  aline @IRCop Scan Scanning: $chan
+  aline @IRCop Scan $str(-,200)
+  aline @IRCop Scan [LEVEL $+ $chr(9) $+ ][NICK $+ $chr(9) $+ ][ADDRESS $+ $chr(9) $+ ]]
+  .enable #copscan | who #
+}
+ON 1:CLOSE:@IRCop Scan:{ .disable #copscan | halt }
+#copscan off
+raw 352:*:{ if (* isin $parm7) { aline @IRCop Scan [ $+ $level($maddress($address($parm6,?))) $+  $+ $chr(9) $+ ][ $+ $parm6 $+  $+ $chr(9) $+ ][ $+ $parm3 $+ @ $+ $parm4 $+  $+ $chr(9) $+ ]] } | halt }
+raw 315:*:{ aline @IRCop Scan $str(-,200) | aline @IRCop Scan Scanning Complete | sline @IRCop Scan 6 | .disable #copscan | halt }

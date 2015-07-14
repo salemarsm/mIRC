@@ -1,0 +1,149 @@
+
+THE HANDY DANDY ANALOGX NETSTAT LIVE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Have you ever been browsing the internet, and things just seem a bit slower
+than they normally do?  Ever wonder just how directly you connect to another
+server on the internet?  How about just wanting to know whether or not you're
+sending and receiving data on a cable modem or other high-speed connection?
+If you're like me, then these thoughts have probably crossed your mind more
+than once... It sure would be wonderful if someone could solve this problem,
+and make the world just a little bit better.  Once again, AnalogX comes to
+the rescue with AnalogX NetStat LIVE!
+
+AnalogX NetStat Live (or NSL) is a super easy to use, fast, and effective way
+to monitor your internet connection status and system performance.  It graphs
+the last 60 seconds of data throughput, displaying the average datarate, the
+total amount of data sent since last reboot, and the maximum datarate.  It
+tracks these for all incoming and outgoing messages, so you don't need to worry
+about configuring your browser or other programs to work with it - it just does
+it automatically!
+
+
+    :::The Display:::
+The NSL window is split into several section; any of the pane's inside the
+window can be turned on or off to help customize the look of the program to
+exactly what you want.  To enable or disable a pane, simply right click on
+the NSL window, and choose 'Statistics' from the menu - anything with a check
+next to it will be displayed.  Here's a list of the pane's currently available:
+
+    Local Machine:      This shows the current machine name, IP address, and
+                        network interface being monitored
+    Remote Machine:     This shows information regarding a remote machine,
+                        including average ping time and number of hops
+    Incoming Totals:    This shows totals for the incoming data
+    Incoming:           This shows the total amount of data on the incoming
+                        (download) channel
+    Outgoing Totals:    This shows totals for the outgoing data
+    Outgoing:           This shows the total amount of data on the outgoing
+                        (upload) channel
+    Threads:            This shows the total number of threads currently
+                        running in the system
+    CPU:                This graphs the CPU load (this does not work on WinNT
+                        and Win2k yet)
+
+The graphs automatically adjust themselves to whatever bandwidth you have
+available to you, so the number indicated as the 'maximum' value will be the
+very top of the graph.  If a value larger than the current maximum comes in,
+the graph will automatically adjust to make this the new top value.  If you
+want to, you can 'Reset' the graphs and values to zero to get a clean reading
+of the current performance.
+
+The values displayed (current, average, and maximum) are shown in three
+different ways; if the value is less than 1024 bytes, it will have a 'B'
+after it.  If it's more than 1024 bytes, then it will have a 'KB' after it;
+and finally if it's greater than 1024KB it will have an 'MB' after it (for
+megabyte).  It's also important to note that the current value is your current
+throughput, it will tend to jump around, so the it's usually better to rely
+on the average value.  The average value, which is an average of the last 60
+seconds, is your best indicator of how fast your connection is.  You may also
+notice a light line on the graph; this is the current average line.
+
+You may have noticed that the remote network info has a machine listed, and
+some info pertaining to it... Would you like to know how to change the server?
+Just open up your browser, go to a webpage, and copy the url (including the
+http://) into the clipboard (by hitting CTRL-C).  Now look at NSL... Notice
+anything?  The server will now be replaced with whatever you had in the
+clipboard!
+
+
+    :::Configuration:::
+NSL can also be configure to operate in several different ways from the Config
+menu.  First, you can set it to 'Auto Minimize'; this means when the program
+starts up, it will automatically show up on the system tray instead of a big
+window on the screen.  Next, you can have it 'Auto Start', which will cause it
+to automatically run every time you reboot your machine (great to use with the
+auto minimize option).  Another option is 'URL ClipCap', with this turned on,
+NetStat will scan the clipboard for URL's, and if it finds one it will auto-
+matically ping/traceroute it.  With the 'Always on Top' option, the NSL dialog
+will be always above of other windows, so you can see the information no matter
+what else is on the screen.  Finally, you can select which TCP/IP interface
+the program will monitor, or have it monitor all the interfaces - selection
+is made based on the IP address of the interface (and if the interface can't
+be found for some reason, it defaults back to ALL).
+
+If you minimize NSL, it will appear on the system tray (the small box on the
+right edge of the task bar, on the bottom of the screen.  The icon shows the
+status of the connection with the small triangle on the bottom of the icon.
+If it is green, it's received or send data within the last 60 seconds, if it
+is yellow, it hasn't had any network activity for 60 seconds to 120 seconds,
+and if it hasn't had any activity after that, it turns red.  If the left
+portion of the icon lights up white, then it's sending data, and if the right
+portion lights up white, then it's receiving data.  You can maximize the app
+again simply by left clicking on the icon, or you can bring up a small menu
+of options by right clicking on it.
+
+
+    :::Tips:::
+A couple points of interest about the program.  First, it tracks all network
+activity; this means you can see how quickly data moves across your local
+network as well (as long as you're using TCP/IP).  This also means that when
+it's used on a modem connection, you're seeing your actual throughput, not
+just what the dialup networking adapter or modem SAYS it's doing.  The upside
+is that you'll see exactly what kind of performance you're getting while you
+are browsing around webpages.  If you are interested in seeing exactly how
+fast you connection is, the best way is to download a binary file (make sure
+it will take more than 1 minute), and then look at the average reported.
+Because this program uses this technique, it means it's compatible with not
+only modems, but cable modems, DSL's, even network connections!
+
+The monthly incoming/outgoing totals are only accurate if you leave NSL running
+ALL the time, and do not exit the program before rebooting - this is KEY!  If
+you exit the program before rebooting, then it will not store the current usage.
+
+    :::Troubleshooting:::
+If you encounter the error 'Couldn't load inetmib1.dll (0x0000001F) (31)',
+then it incredibly descriptive error (provided by Microsoft) is:
+
+    It was unable to start a connected device for some reason.
+
+There's no way (that I'm aware of) to get any more info about who, what, why,
+or where the problem arises from... I contacted Microsoft about it, and they
+say that it's usually caused by either a faulty network install, improperly
+written driver, or an unused or duplicate driver entry.
+
+If you're running Windows95, and get the message that it can't find the DLL
+'snmpapi.dll', then you need to go to microsoft and download the Winsock and
+Winsock2 updates that they have available (in the Networking Tools section).
+You can find these at:
+
+http://www.microsoft.com/windows95/downloads/
+
+If you're running to the message that it can't find the DLL 'inetmib1.dll',
+then you need to download the Dialup Networking Upgrade as well as the updates
+mentioed above.
+
+If you're running WinNT/2k, the CPU graph is not currently operational.  This
+functionality will be added in one of the next releases.
+
+
+    :::Thanks:::
+Special thanks to Leo Laporte, over at ZDTV (www.zdtv.com), the host of 'Call
+for Help' and 'The Screen Savers' for helping me test out and fine tune the
+program!
+
+For more info, and some cool music, and enough free programs to make even
+Microsoft look twice, make sure to check out the website at:
+
+http://www.analogx.com/
+

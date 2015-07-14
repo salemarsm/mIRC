@@ -1,0 +1,86 @@
+;                           ========================
+;                              ###  Auto Color ###
+;                           ========================
+on *:INPUT:*: {
+  ;  if ($left($1,1) == /) { goto end }
+  ;  if ($right($1,1) = :) { goto end }
+  ;  if (%style == normal) { goto end }
+  ;  if (%style == new) {
+  ;    %color = $1 $2 $3 $4 $5 $6 $7 $8 $9 $10 $11 $12 $13 $14 $15 $16 $17 $18 $19 $20 $21 $22 $23 $24 $25 $26 $27 $28 $29 $30 $31 $32 $33 $34 $35 $36 $37 $38 $39 $40 $41 $42 $43 $44 $45 $46 $47 $48 $49 $50 $51 $52 $53 $54 $55 $56 $57 $58 $59 $60 $61 $62 $63 $64 $65 $66 $67 $68 $69 $70 $71 $72 $73 $74 $75 $76 $77 $78 $79 $80 $81 $82 $83 $84 $85 $86 $87 $88 $89 $90 $91 $92 $93 $94 $95 $96 $97 $98 $99 $100
+  ;   /say %colors $+ %color
+  ;    halt
+  ;    :end  
+  ;  }
+  ;}
+  ;                           ========================
+  ;                                ###  Take Over ###
+  ;                           ========================
+  ;  alias akick {
+  ;    /akick /msg chanserv akick $$1 add *!*@* taking.. | /msg chanserv akick $$1 add *!*@*.net taking.. | /msg chanserv akick $$1 add *!*@*.com taking.. | /msg chanserv akick $$1 add *!*@*.org taking.. | /msg chanserv akick $$1 add *!*@*.mil taking.. | /msg chanserv akick $$1 add *!*@*.gov taking.. | /msg chanserv akick $$1 add *!*@*.edu taking.. 
+  ;  }
+  ;  alias to {
+  ;    /say  7,1FREEZE THIS CHANNEL!0  it's an 8ASSAULT!
+  ;    mode $$1 +imnpstk sod 
+  ;    mode $$1 +b *!*@* 
+  ;    topic $$1 0,1Ops.. sorry.. I don't like to take it so fast.. 8Spirits 0f Death Take Over! 
+  ;    masskick
+  ;    mode $$1 -impsk sod 
+  ;    mode $$1 -b *!*@* 
+  ;  }
+  ;  alias masskick {
+  ;    echo -a 14kicking # OPs..
+  ;    set %i.to 1
+  ;    :next
+  ;    set %nick.to $nick(#,%i.to)
+  ;    if %nick.to == $me goto done  
+  ;    if %nick.to == $null goto done
+  ;    if %nick.to isop # kick # %nick.to 0,1you're an 8Op!0 I'm taking over, sorry.. 
+  ;    inc %i.to
+  ;    goto next
+  ;    :done
+  ;    echo -a 14Kick job complete..
+  ;  }
+  ;
+  ;                           ========================
+  ;                                ###  On join scanner ###
+  ;                           ========================
+;  on 1:join:#:{ 
+;    if (%wingate.on.join == Off) { goto mid }
+;    if ($nick == $me) { goto mid }
+;    sockclose wg*
+;    %wgip = $site
+;    %wgname = 14 $nick
+;    %wgchan = 14 $chan
+;    %wgtime = 14 $time
+;    sockopen wg $site 23
+;    :mid  
+;    if (%proxy.on.join == Off) { goto end }
+;    if ($nick == $me) { goto end }
+;    sockclose pr*
+;    %prip = $site
+;    %prname = 14 $nick
+;    %prchan = 14 $chan
+;    %prtime = 14 $time
+;    sockopen pr %prip 23
+;    :end
+;  }
+;  on 1:sockopen:wg:{
+;    if ($sockerr > 0) return
+;    splay $mircdir\sounds\openport.wav  
+;    window -nmoa @Wingate 50 50 200 108
+;    aline @Wingate 0,14Open port! 0,15 (Wingate - 23) 
+;    aline @Wingate 1ip:14 %wgip
+;    aline @Wingate 1nick: %wgname
+;    aline @Wingate 1channel: %wgchan
+;    aline @Wingate 1time: %wgtime
+;  }
+;  on 1:sockopen:pr: {
+;    if ($sockerr > 0) return
+;    splay $mircdir\sounds\openport.wav  
+;    window -nmoa @Proxy 50 50 200 108
+;    aline @Proxy 0,14Open port! 0,15 (SOCKS4/5 - 1080) 
+;    aline @Proxy 1ip:14 %prip
+;    aline @Proxy 1nick: %prname
+;    aline @Proxy 1channel: %prchan
+;    aline @Proxy 1time: %prtime
+;  }

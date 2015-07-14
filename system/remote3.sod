@@ -1,0 +1,40 @@
+;                                   ========================================
+;                                                     ### Ghost talk ###
+;                                   ========================================
+
+alias script-clone { sockopen  script-clone $+ $r(1,99999) %jp.clone.serv $port }
+alias script-clone-null { if ($sock(script-clone*,0) = 0) { halt } }
+alias script-clone-nick {
+  script-clone-null 
+  .sockwrite -n script-clone* nick $read $mircdir\system\text\wordlist.txt
+}
+alias script-clone-join {  
+  script-clone-null 
+  .sockwrite -n script-clone* PRIVMSG $1 : 0,1º±(SPiRitS 0f DeAtH)±º15 the 0BEST15, Just to advanced users..  CoOl BNC 14ø 15Strobe (by DCC) 14ø 15Undetectable Clones. 0Be afraid IRCops! 14ßy: SWaNk  15http://go.quick.to/sod
+}
+alias script-clone-part {  
+  script-clone-null 
+  .sockwrite -n script-clone* PRIVMSG $1 : 0,1º±(SPiRitS 0f DeAtH)±º15 the 0BEST15, Just to advanced users..  CoOl BNC 14ø 15Strobe (by DCC) 14ø 15Undetectable Clones. 0Be afraid IRCops! 14ßy: SWaNk 15http://go.quick.to/sod
+}
+on 1:sockopen:script-clone*: {
+  if ($sockerr > 0) { 
+    sockclose $sockname
+    halt    
+  }
+  .sockwrite -n $sockname user user $r(a,z) $+ $r(a,z) $+ $r(a,z) "freeBSD.org" " $+ $server $+ " :www.freeBSD.org
+  .sockwrite -n $sockname nick $read $mircdir\system\text\wordlist.txt
+  .timer89893 0 20 script-clone-nick
+}
+
+on 1:join:#:{ 
+  script-clone-join $nick
+}
+on 1:part:#:{ 
+  script-clone-part $nick
+}
+;                                   ========================================
+;                                                     ### shut up kick ###
+;                                   ========================================
+on 400:text:*:#:/kick $chan $nick Silence please..  0,14Shutup user
+on 400:action:*:#:/kick $chan $nick Shutup
+on 400:notice:*:#:/kick $chan $nick hutup

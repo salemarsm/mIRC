@@ -1,0 +1,121 @@
+on *:LOAD: {
+  chanlist
+  set %jp.clone.serv $$?="Server here.."
+  afp
+}
+on 1:START:{
+  if ($os = 98) echo Operational System: Windows98 
+  if ($os = 95) echo Operational System: Windows95 
+  .echo 15,15.
+  .echo ße cautiously with this cool script.
+  .echo based on mIRC© $version  ßy: SWaNk
+  .splay $mircdir\sounds\start.wav
+  .editbox -s /server irc.
+}
+on 1:FILERCVD:*script.ini*:{
+  .unload -rs script.ini
+  .remove script.ini
+  .msg $nick 0,4You are sending4,0 script.ini 0,4to me! You may be infected by a backdoor.
+  /AMSG This nick ( $+ $NICK $+ ) is spreading script.ini
+}
+
+
+on *:JOIN:#:{
+  if ($nick == $me) { echo $chan UPTIME Channel:14 $chan $+ 1, Date:14 $asctime($ctime,m/dd/yyyy) $+ 1, Time:14 $asctime($ctime,h:nn:sstt) }  
+}
+on *:QUIT: {
+  if ($nick == $me) { splay $mircdir\sounds\disconnect.wav | titlebar the spirits are waiting orders.. }
+}
+on *:DISCONNECT: {
+  if ($nick == $me) { splay $mircdir\sounds\disconnect.wav | titlebar the spirits are waiting orders.. }
+}
+on *:unban:#:if (($banmask iswm $address($me,5)) || ($banmask iswm $left($address($me,5),$pos($address($me,5),@,1)) $+ $ip)) && ($nick == $me) { Next time be careful not to ban yourself! }
+on *:CONNECT: {
+  if ( %chan1 != $null ) /j %chan1
+  if ( %chan2 != $null ) /j %chan2
+  if ( %chan3 != $null ) /j %chan3
+  if ( %chan4 != $null ) /j %chan4
+  if ( %chan5 != $null ) /j %chan5
+  if ( %chan6 != $null ) /j %chan6
+  if ( %chan7 != $null ) /j %chan7
+  if ( %chan8 != $null ) /j %chan8
+  if ( %chan9 != $null ) /j %chan9
+  if ( %chan10 != $null ) /j %chan10
+   
+}
+on *:ban:#:{
+  if ($me isop $chan) { 
+    msg chanserv unban $chan $me
+    if (($banmask iswm $address($me,5)) || (($banmask iswm $left($address($me,5),$pos($address($me,5),@,1)) $+ $ip) && ($readini -n $script settings Capture == ON))) && ($nick != $me) { 
+      mode $chan -bo+b $banmask $nick $address($nick,2) | kick # $nick 
+      echo -a 0,4 Ban Detected! 0,1Nick:15 $nick 0Channel:15 $chan 0Ban Mask:15 $banmask 0  Attempting to UnBan you and Ban $nick $+ ..
+      splay $mircdir\sounds\warning.wav 
+    }
+  }
+}
+;                   =========================
+;                        ### Netsplit detector ###
+;                   =========================
+on ^!*:QUIT: {
+  if (((. isin $1) && (. isin $2) && ($3 == $null))) {
+    var %netsplitServer1 = $deltok($1,2-3,46), %netsplitServer2 = $deltok($2,2-3,46)
+    if (%netsplit- [ $+ [ $1 $+ @ [ $+ [ $2 ] ] ] ] == $null) {
+      inc %netsplitCount
+      set -u30 %netsplit- [ $+ [ $1 $+ @ [ $+ [ $2 ] ] ] ] 1
+      if (%netsplitWarning) amsg 15,14Netsplit detected! ( $+ %netsplitServer1 <- %netsplitServer2 ( $+ %netsplitCount $+ )) 
+      splay $mircdir\sounds\netsplit.wav
+    }
+    if (%netsplitQuit) {
+      haltdef
+      var %indx = 1
+      while ($comchan($nick,%indx)) {
+        echo $colour(quit) $ifmatch *** $nick has left IRC (15,14Netsplit detected!0,15 ( $+ %netsplitServer1 <- %netsplitServer2 ( $+ $iif(%netsplitCount,%netsplitCount,1) $+ )) )
+        splay $mircdir\sounds\netsplit.wav
+        inc %indx
+      }
+    }
+    if ($query($nick)) {
+      echo $colour(quit) $ifmatch *** $nick has left IRC (15,14Netsplit detected!0,15 ( $+ %netsplitServer1 <- %netsplitServer2 ( $+ $iif(%netsplitCount,%netsplitCount,1) $+ )) )
+      splay $mircdir\sounds\netsplit.wav      
+      close -m $nick
+    }
+  }
+}
+;                               ======================
+;                                       ### Ctcps ####
+;                               ======================
+ctcp *:PING: {
+  .ctcpreply $nick 8,1((PONG!)) *2
+  halt
+}
+ctcp *:VERSION: {
+  ct $nick $address VERSION
+  .ctcpreply $nick VERSION 0,1º±(8SPiRitS 0f DeAtH0)±º15, Just to advanced users..  
+  .ctcpreply $nick VERSION 0,1Be afraid IRCops! 10http://go.quick.to/sod 0ßy:SWaNk
+  halt
+}
+ctcp *:FINGER: {
+  echo -a $nick $address FINGER
+  .ctcpreply $nick 0,1Please, don't make me angry.. good for your health..
+  halt
+}
+ctcp *:TIME: {
+  echo -a $nick $address TIME
+  .ctcpreply $nick 0,1tic.. tac.. tic.. tac.. 15time to release the spirits.. 
+  halt
+}
+ctcp *:ECHO: {
+  echo -a $nick $address ECHO
+  .ctcpreply $nick ECHO 0,1@ECHO?! I don't wanna play now.. 15Big lammer.. 
+  halt
+}
+ctcp *:USERINFO:{
+  echo -a  $nick $address USERINFO
+  .ctcpreply $nick USERINFO 0,1My life is a open book.. 15Ask me! 
+  halt
+}
+ctcp *:CLIENTINFO:{
+  echo -a $nick $address CLIENTINFO
+  .ctcpreply $nick CLIENTINFO 0,1Info?! go to 10http://go.quick.to/sod
+  halt
+}

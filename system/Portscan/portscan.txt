@@ -1,0 +1,26 @@
+0   :PortScan Ready
+0   :SCANNING HOST:200.188.59.47
+0   :SCAN BEGUN ON PORT:0
+59   :CONNECT
+139   :CONNECT      netbios-ssn
+59   :CLOSED
+0   :SCAN HALTED ON PORT:4010
+0   :PortScan Ready
+0   :SCANNING HOST:201.38.72.6
+0   :SCAN BEGUN ON PORT:0
+0   :IP:201.38.72.6
+21   :CONNECT      ftp
+25   :CONNECT      smtp
+25   :220 sintese.net Microsoft ESMTP MAIL Service, Version: 6.0.3790.1830 ready at Thu, 19 Jan 2006 21:02:41 -0300
+80   :CONNECT      www
+110   :CONNECT      pop3
+135   :CONNECT
+443   :CONNECT
+21   :CLOSED
+110   :CLOSED
+1723   :CONNECT
+1723   :CLOSED
+25   :CLOSED
+443   :CLOSED
+34288   :CONNECT
+34288   :CLOSED
